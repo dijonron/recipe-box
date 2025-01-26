@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package ingredient_service.v1;
+
+option go_package = "generated/proto/ingredient_service/v1";
+
+
+service IngredientService {
+  // Creates an ingredient
+  rpc CreateIngredient(CreateIngredientRequest) returns (CreateIngredientResponse);
+
+  // Gets an ingredient
+  rpc GetIngredient(GetIngredientRequest) returns (GetIngredientResponse);
+}
+
+
+// Ingredient message to represent the ingredient data.
+message Ingredient {
+  string id = 1;               // Unique identifier for the ingredient.
+  string name = 2;             // Name of the ingredient (e.g. Butter).
+  float amount = 3;            // Amount (e.g. 1.25, 4).
+  Measurement measurement = 4; // Unit of measurement (e.g. cup, tbsp).
+}
+
+// Enum for units of measurement.
+enum Measurement {
+  UNKNOWN = 0;
+  UNIT = 1;
+  TSP = 2;
+  TBSP = 3;
+  CUP = 4;
+  MILLILITER = 6;
+  LITER = 5;
+  GRAM = 7;
+}
+
+// Request message for creating an ingredient.
+message CreateIngredientRequest {
+  Ingredient ingredient = 1;  // The ingredient to create.
+}
+
+// Response message for creating an ingredient
+message CreateIngredientResponse {
+  Ingredient ingredient = 1;  // The created ingredient.
+}
+
+// Request message for fetching an ingredient by its ID.
+message GetIngredientRequest {
+  string id = 1;             // ID of the ingredient to fetch.
+}
+
+// Response message for returning the ingredient details.
+message GetIngredientResponse {
+  Ingredient ingredient = 1; // The fetched ingredient details.
+}
