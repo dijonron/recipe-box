@@ -3,24 +3,47 @@ package recipe_service.v1;
 
 option go_package = "server/generated/proto/recipe_service/v1/recipepb";
 
-
+import "google/api/annotations.proto";
 
 service RecipeService {
   // Creates a recipe
-  rpc CreateRecipe(CreateRecipeRequest) returns (RecipeResponse);
+  rpc CreateRecipe(CreateRecipeRequest) returns (RecipeResponse){
+    option (google.api.http) = { 
+      post: "/v1/recipes",
+      body: "*"
+    };
+  }
+
 
   // Gets an recipe
-  rpc GetRecipe(GetRecipeRequest) returns (RecipeResponse);
+  rpc GetRecipe(GetRecipeRequest) returns (RecipeResponse){
+    option (google.api.http) = {
+      get: "/v1/recipes/{id}"
+    };
+  }
 
   // List recipes
-  rpc ListRecipes(ListRecipesRequest) returns (ListRecipesResponse);
+  rpc ListRecipes(ListRecipesRequest) returns (ListRecipesResponse){
+    option (google.api.http) = {
+      get: "/v1/recipes"
+    };
+  }
 
   // Update a recipe
-  rpc UpdateRecipe(UpdateRecipeRequest) returns (RecipeResponse);
+  rpc UpdateRecipe(UpdateRecipeRequest) returns (RecipeResponse){
+    option (google.api.http) = {
+      put: "/v1/recipes/{id}"
+      body: "*"
+    };
+  }
   
   // Delete a recipe
-  rpc DeleteRecipe(DeleteRecipeRequest) returns (Empty);
+  rpc DeleteRecipe(DeleteRecipeRequest) returns (Empty){
+    option (google.api.http) = {
+      delete: "/v1/recipes/{id}"
+    };
   }
+}
 
 // Recipe message to represent the recipe.
 message Recipe {

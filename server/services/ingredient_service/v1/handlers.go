@@ -1,9 +1,9 @@
-package main
+package ingredient_service
 
 import (
 	"context"
 
-	"github.com/dijonron/recipe-box/generated/proto/ingredient_service/v1/ingredientpb"
+	ingredientpb "github.com/dijonron/recipe-box/generated/ingredient_service/v1"
 )
 
 func (s IngredientServer) CreateIngredient(context.Context, *ingredientpb.CreateIngredientRequest) (*ingredientpb.IngredientResponse, error) {

@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { useFormik } from "formik";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
@@ -16,6 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { MEASURMENT } from "../../utils/constants";
 
 function RecipeModal(props) {
   const { open = false, handleClose } = props;
@@ -31,8 +32,17 @@ function RecipeModal(props) {
         { id: 0, name: "", amount: 1, measurement: "" },
       ],
     },
-    onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+    onSubmit: async (values) => {
+      const res = await fetch("http://localhost:8080/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ values }),
+      });
+
+      const data = await res.json();
+      console.log(data);
     },
   });
 
@@ -94,8 +104,6 @@ function RecipeModal(props) {
 
           <Grid container spacing={2} alignItems={"flex-end"}>
             {formik.values.ingredients.map((ingredient, i) => {
-              const { name, amount, measurement } = ingredient;
-
               return (
                 <Fragment key={`ingredient-${i}`}>
                   <Grid size={6}>
@@ -129,9 +137,7 @@ function RecipeModal(props) {
                       value={formik.values.ingredients[i].amount}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                    >
-                      {amount}
-                    </TextField>
+                    />
                   </Grid>
                   <Grid size={3}>
                     <FormControl variant="standard" fullWidth>
@@ -148,12 +154,9 @@ function RecipeModal(props) {
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                       >
-                        <MenuItem value="">
-                          <em>None</em>
-                        </MenuItem>
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                        {Object.entries(MEASURMENT).map(([val, key]) => (
+                          <MenuItem value={val}>{key}</MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   </Grid>
@@ -206,7 +209,7 @@ function RecipeModal(props) {
               color="primary"
               variant="contained"
               type="submit"
-              onClick={() => console.log("add recipe")}
+              // onClick={() => console.log("add recipe")}
             >
               Add Recipie
             </Button>

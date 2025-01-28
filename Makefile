@@ -12,10 +12,8 @@ down:
 	@echo 'Done!'
 
 
-.PHONY: protog
-protog:
+.PHONY: bufgen
+bufgen:
 	@echo 'Generate protobuf...'
-	protoc --go_out=. --go-grpc_out=. \
-	server/proto/ingredient_service/v1/ingredient_service_v1.proto \
-	server/proto/recipe_service/v1/recipe_service_v1.proto
+	cd ./server && buf generate && cd ../
 	@echo 'Done!'

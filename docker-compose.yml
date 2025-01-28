@@ -6,20 +6,20 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
-    # depends_on:
-    #   - api-gateway
+    depends_on:
+      - api_gateway
 
-  # api-gateway:
-  #   container_name: api
-  #   build:
-  #     context: ./server/api/gateway
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - database
-  #     - ingredient_service
-  #     - recipe_service
+  api_gateway:
+    container_name: api_gateway
+    build:
+      context: ./server
+      dockerfile: api/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+      - ingredient_service
+      - recipe_service
 
   ingredient_service:
     container_name: ingredient_service
@@ -31,8 +31,8 @@ services:
     env_file:
       - server/services/ingredient_service/v1/.env
 
-  recipe-service:
-    container_name: recipe-service
+  recipe_service:
+    container_name: recipe_service
     build:
       context: ./server
       dockerfile: services/recipe_service/v1/Dockerfile
