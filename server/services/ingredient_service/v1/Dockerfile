@@ -6,13 +6,13 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o app ./services/ingredient_service/v1
+RUN go build -o ingredient_service ./services/ingredient_service/v1
 
 FROM alpine:3.14
 
 WORKDIR /service
 
-COPY --from=builder /service/app .
+COPY --from=builder /service/ingredient_service .
 
 EXPOSE 50051
-ENTRYPOINT [ "./app" ]
+ENTRYPOINT [ "./ingredient_service" ]

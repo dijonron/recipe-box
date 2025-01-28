@@ -6,13 +6,13 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o api ./api
+RUN go build -o gateway ./api/gateway.go
 
 FROM alpine:3.14
 
 WORKDIR /service
 
-COPY --from=builder /service/api .
+COPY --from=builder /service/gateway .
 
 EXPOSE 3000
-ENTRYPOINT [ "./api" ]
+ENTRYPOINT [ "./gateway" ]

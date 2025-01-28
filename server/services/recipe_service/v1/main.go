@@ -1,49 +1,22 @@
-package recipe_service
+package main
 
 import (
-	"context"
+	"log"
 
-	recipepb "github.com/dijonron/recipe-box/generated/recipe_service/v1"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	recipepb "github.com/dijonron/recipe-box/server/generated/recipe_service/v1"
+	"github.com/dijonron/recipe-box/server/internal/common"
+	"google.golang.org/grpc"
 )
 
-type RecipeServer struct {
-	recipepb.UnimplementedRecipeServiceServer
-}
+func main() {
+	service := common.CreateService()
 
-func (s RecipeServer) CreateRecipe(context.Context, *recipepb.CreateRecipeRequest) (*recipepb.RecipeResponse, error) {
+	_, err := service.Serve(func(server *grpc.Server) {
+		recipepb.RegisterRecipeServiceServer(server, &RecipeServer{})
+	})
 
-	return &recipepb.RecipeResponse{
-		Recipe: &recipepb.Recipe{
-			Id:          "1",
-			Name:        "Cookies",
-			Chef:        "Me",
-			Cookbook:    "Yes",
-			Ingredients: []*recipepb.RecipeIngredient{{IngredientId: "1", Name: "Flour", Amount: 3, Measurement: recipepb.Measurement_CUP}},
-		},
-	}, nil
-}
+	if err != nil {
+		log.Fatal(err)
+	}
 
-func (s RecipeServer) GetRecipe(context.Context, *recipepb.GetRecipeRequest) (*recipepb.RecipeResponse, error) {
-
-	return &recipepb.RecipeResponse{
-		Recipe: &recipepb.Recipe{
-			Id:          "1",
-			Name:        "Cookies",
-			Chef:        "Me",
-			Cookbook:    "Yes",
-			Ingredients: []*recipepb.RecipeIngredient{{IngredientId: "1", Name: "Flour", Amount: 3, Measurement: recipepb.Measurement_CUP}},
-		},
-	}, nil
-}
-
-func (s RecipeServer) ListRecipes(context.Context, *recipepb.ListRecipesRequest) (*recipepb.ListRecipesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListRecipes not implemented")
-}
-func (s RecipeServer) UpdateRecipe(context.Context, *recipepb.UpdateRecipeRequest) (*recipepb.RecipeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateRecipe not implemented")
-}
-func (s RecipeServer) DeleteRecipe(context.Context, *recipepb.DeleteRecipeRequest) (*recipepb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteRecipe not implemented")
 }

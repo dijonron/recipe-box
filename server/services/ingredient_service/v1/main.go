@@ -1,23 +1,17 @@
-package ingredient_service
+package main
 
 import (
 	"log"
 
-	ingredientpb "github.com/dijonron/recipe-box/generated/ingredient_service/v1"
-	"github.com/dijonron/recipe-box/internal/common"
+	ingredientpb "github.com/dijonron/recipe-box/server/generated/ingredient_service/v1"
+	"github.com/dijonron/recipe-box/server/internal/common"
 	"google.golang.org/grpc"
 )
 
-type IngredientServer struct {
-	ingredientpb.UnimplementedIngredientServiceServer
-}
-
-func StartService() {
+func main() {
 	service := common.CreateService()
 
-	// Start the service and register the specific gRPC service
 	_, err := service.Serve(func(server *grpc.Server) {
-		// Register the ingredient_service gRPC server implementation
 		ingredientpb.RegisterIngredientServiceServer(server, &IngredientServer{})
 	})
 
