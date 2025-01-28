@@ -6,8 +6,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
-    # depends_on:
-    #   - api_gateway
+    depends_on:
+      - api_gateway
 
   api_gateway:
     container_name: api_gateway
@@ -18,10 +18,9 @@ services:
       - "8080:8080"
     env_file:
       - server/api/.env
-  # depends_on:
-  #   - database
-  #   - ingredient_service
-  #   - recipe_service
+    depends_on:
+      - ingredient_service
+      - recipe_service
 
   ingredient_service:
     container_name: ingredient_service
@@ -32,8 +31,8 @@ services:
       - "50051:50051"
     env_file:
       - server/services/ingredient_service/v1/.env
-    # depends_on:
-    #   - database
+    depends_on:
+      - database
 
   recipe_service:
     container_name: recipe_service
@@ -44,8 +43,8 @@ services:
       - "50052:50052"
     env_file:
       - server/services/recipe_service/v1/.env
-    # depends_on:
-    #   - database
+    depends_on:
+      - database
 
   database:
     image: postgres:13
