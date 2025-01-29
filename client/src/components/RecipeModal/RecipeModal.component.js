@@ -33,13 +33,16 @@ function RecipeModal(props) {
       ],
     },
     onSubmit: async (values) => {
-      const res = await fetch("http://localhost:8080/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ values }),
-      });
+      const res = await fetch(
+        `${process.env.REACT_APP_GATEWAY_URL}/v1/recipes`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ values }),
+        }
+      );
 
       const data = await res.json();
       console.log(data);

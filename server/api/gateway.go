@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	recipepb "github.com/dijonron/recipe-box/server/generated/recipe_service/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -13,16 +15,10 @@ import (
 )
 
 func main() {
-	// service := common.CreateService()
-
-	// // Start the service and register the specific gRPC service
-	// _, err := service.Serve(func(server *grpc.Server) {
-	// 	recipepb.RegisterRecipeServiceServer(server, &recipe_service.RecipeServer{})
-	// })
-
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	port, err := strconv.Atoi(os.Getenv("PORT"))
+	if err != nil {
+		log.Fatalf("invalid value for PORT (%d): %v", port, err)
+	}
 
 	recipeServiceURL := os.Getenv("RECIPE_SERVICE_URL")
 	if recipeServiceURL == "" {
@@ -42,13 +38,6 @@ func main() {
 	}
 
 	http.Handle("/", mux)
-	log.Println("Starting HTTP server on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-	// gwServer := &http.Server{
-	// 	Addr:    ":8080",
-	// 	Handler: mux,
-	// }
-
-	// log.Println("Serving gRPC-Gateway on http://0.0.0.0:8080")
-	// log.Fatalln(gwServer.ListenAndServe())
+	log.Printf("Starting HTTP server on port %d ...", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }

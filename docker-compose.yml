@@ -8,6 +8,8 @@ services:
       - "80:80"
     depends_on:
       - api_gateway
+    env_file:
+      - client/.env
 
   api_gateway:
     container_name: api_gateway
@@ -15,7 +17,9 @@ services:
       context: ./server
       dockerfile: api/Dockerfile
     ports:
-      - "8080:8080"
+      - "3000:3000"
+    networks:
+      - app-network
     env_file:
       - server/api/.env
     depends_on:
@@ -29,6 +33,8 @@ services:
       dockerfile: services/ingredient_service/v1/Dockerfile
     ports:
       - "50051:50051"
+    networks:
+      - app-network
     env_file:
       - server/services/ingredient_service/v1/.env
     depends_on:
@@ -41,6 +47,8 @@ services:
       dockerfile: services/recipe_service/v1/Dockerfile
     ports:
       - "50052:50052"
+    networks:
+      - app-network
     env_file:
       - server/services/recipe_service/v1/.env
     depends_on:
@@ -62,3 +70,7 @@ services:
 volumes:
   postgres_data:
     driver: local
+
+networks:
+  app-network:
+    driver: bridge
