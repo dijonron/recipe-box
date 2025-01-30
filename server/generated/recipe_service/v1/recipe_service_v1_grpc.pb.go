@@ -31,15 +31,15 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RecipeServiceClient interface {
 	// Creates a recipe
-	CreateRecipe(ctx context.Context, in *CreateRecipeRequest, opts ...grpc.CallOption) (*RecipeResponse, error)
+	CreateRecipe(ctx context.Context, in *CreateRecipeRequest, opts ...grpc.CallOption) (*CreateRecipeResponse, error)
 	// Gets an recipe
-	GetRecipe(ctx context.Context, in *GetRecipeRequest, opts ...grpc.CallOption) (*RecipeResponse, error)
+	GetRecipe(ctx context.Context, in *GetRecipeRequest, opts ...grpc.CallOption) (*GetRecipeResponse, error)
 	// List recipes
 	ListRecipes(ctx context.Context, in *ListRecipesRequest, opts ...grpc.CallOption) (*ListRecipesResponse, error)
 	// Update a recipe
-	UpdateRecipe(ctx context.Context, in *UpdateRecipeRequest, opts ...grpc.CallOption) (*RecipeResponse, error)
+	UpdateRecipe(ctx context.Context, in *UpdateRecipeRequest, opts ...grpc.CallOption) (*UpdateRecipeResponse, error)
 	// Delete a recipe
-	DeleteRecipe(ctx context.Context, in *DeleteRecipeRequest, opts ...grpc.CallOption) (*Empty, error)
+	DeleteRecipe(ctx context.Context, in *DeleteRecipeRequest, opts ...grpc.CallOption) (*DeleteRecipeResponse, error)
 }
 
 type recipeServiceClient struct {
@@ -50,9 +50,9 @@ func NewRecipeServiceClient(cc grpc.ClientConnInterface) RecipeServiceClient {
 	return &recipeServiceClient{cc}
 }
 
-func (c *recipeServiceClient) CreateRecipe(ctx context.Context, in *CreateRecipeRequest, opts ...grpc.CallOption) (*RecipeResponse, error) {
+func (c *recipeServiceClient) CreateRecipe(ctx context.Context, in *CreateRecipeRequest, opts ...grpc.CallOption) (*CreateRecipeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RecipeResponse)
+	out := new(CreateRecipeResponse)
 	err := c.cc.Invoke(ctx, RecipeService_CreateRecipe_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -60,9 +60,9 @@ func (c *recipeServiceClient) CreateRecipe(ctx context.Context, in *CreateRecipe
 	return out, nil
 }
 
-func (c *recipeServiceClient) GetRecipe(ctx context.Context, in *GetRecipeRequest, opts ...grpc.CallOption) (*RecipeResponse, error) {
+func (c *recipeServiceClient) GetRecipe(ctx context.Context, in *GetRecipeRequest, opts ...grpc.CallOption) (*GetRecipeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RecipeResponse)
+	out := new(GetRecipeResponse)
 	err := c.cc.Invoke(ctx, RecipeService_GetRecipe_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -80,9 +80,9 @@ func (c *recipeServiceClient) ListRecipes(ctx context.Context, in *ListRecipesRe
 	return out, nil
 }
 
-func (c *recipeServiceClient) UpdateRecipe(ctx context.Context, in *UpdateRecipeRequest, opts ...grpc.CallOption) (*RecipeResponse, error) {
+func (c *recipeServiceClient) UpdateRecipe(ctx context.Context, in *UpdateRecipeRequest, opts ...grpc.CallOption) (*UpdateRecipeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RecipeResponse)
+	out := new(UpdateRecipeResponse)
 	err := c.cc.Invoke(ctx, RecipeService_UpdateRecipe_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -90,9 +90,9 @@ func (c *recipeServiceClient) UpdateRecipe(ctx context.Context, in *UpdateRecipe
 	return out, nil
 }
 
-func (c *recipeServiceClient) DeleteRecipe(ctx context.Context, in *DeleteRecipeRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *recipeServiceClient) DeleteRecipe(ctx context.Context, in *DeleteRecipeRequest, opts ...grpc.CallOption) (*DeleteRecipeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
+	out := new(DeleteRecipeResponse)
 	err := c.cc.Invoke(ctx, RecipeService_DeleteRecipe_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -105,15 +105,15 @@ func (c *recipeServiceClient) DeleteRecipe(ctx context.Context, in *DeleteRecipe
 // for forward compatibility.
 type RecipeServiceServer interface {
 	// Creates a recipe
-	CreateRecipe(context.Context, *CreateRecipeRequest) (*RecipeResponse, error)
+	CreateRecipe(context.Context, *CreateRecipeRequest) (*CreateRecipeResponse, error)
 	// Gets an recipe
-	GetRecipe(context.Context, *GetRecipeRequest) (*RecipeResponse, error)
+	GetRecipe(context.Context, *GetRecipeRequest) (*GetRecipeResponse, error)
 	// List recipes
 	ListRecipes(context.Context, *ListRecipesRequest) (*ListRecipesResponse, error)
 	// Update a recipe
-	UpdateRecipe(context.Context, *UpdateRecipeRequest) (*RecipeResponse, error)
+	UpdateRecipe(context.Context, *UpdateRecipeRequest) (*UpdateRecipeResponse, error)
 	// Delete a recipe
-	DeleteRecipe(context.Context, *DeleteRecipeRequest) (*Empty, error)
+	DeleteRecipe(context.Context, *DeleteRecipeRequest) (*DeleteRecipeResponse, error)
 	mustEmbedUnimplementedRecipeServiceServer()
 }
 
@@ -124,19 +124,19 @@ type RecipeServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRecipeServiceServer struct{}
 
-func (UnimplementedRecipeServiceServer) CreateRecipe(context.Context, *CreateRecipeRequest) (*RecipeResponse, error) {
+func (UnimplementedRecipeServiceServer) CreateRecipe(context.Context, *CreateRecipeRequest) (*CreateRecipeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRecipe not implemented")
 }
-func (UnimplementedRecipeServiceServer) GetRecipe(context.Context, *GetRecipeRequest) (*RecipeResponse, error) {
+func (UnimplementedRecipeServiceServer) GetRecipe(context.Context, *GetRecipeRequest) (*GetRecipeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRecipe not implemented")
 }
 func (UnimplementedRecipeServiceServer) ListRecipes(context.Context, *ListRecipesRequest) (*ListRecipesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRecipes not implemented")
 }
-func (UnimplementedRecipeServiceServer) UpdateRecipe(context.Context, *UpdateRecipeRequest) (*RecipeResponse, error) {
+func (UnimplementedRecipeServiceServer) UpdateRecipe(context.Context, *UpdateRecipeRequest) (*UpdateRecipeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateRecipe not implemented")
 }
-func (UnimplementedRecipeServiceServer) DeleteRecipe(context.Context, *DeleteRecipeRequest) (*Empty, error) {
+func (UnimplementedRecipeServiceServer) DeleteRecipe(context.Context, *DeleteRecipeRequest) (*DeleteRecipeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteRecipe not implemented")
 }
 func (UnimplementedRecipeServiceServer) mustEmbedUnimplementedRecipeServiceServer() {}

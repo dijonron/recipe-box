@@ -11,4 +11,4 @@ plugins:
     out: generated
     opt: paths=source_relative
 inputs:
-  - directory: proto
+  - directory: api/proto

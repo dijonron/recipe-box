@@ -1,0 +1,118 @@
+syntax = "proto3";
+package recipe_service.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "server/generated/proto/recipe_service/v1/recipepb";
+
+service RecipeService {
+  // Creates a recipe
+  rpc CreateRecipe(CreateRecipeRequest) returns (CreateRecipeResponse) {
+    option (google.api.http) = {
+      post: "/v1/recipes"
+      body: "*"
+    };
+  }
+
+  // Gets an recipe
+  rpc GetRecipe(GetRecipeRequest) returns (GetRecipeResponse) {
+    option (google.api.http) = {get: "/v1/recipes/{id}"};
+  }
+
+  // List recipes
+  rpc ListRecipes(ListRecipesRequest) returns (ListRecipesResponse) {
+    option (google.api.http) = {get: "/v1/recipes"};
+  }
+
+  // Update a recipe
+  rpc UpdateRecipe(UpdateRecipeRequest) returns (UpdateRecipeResponse) {
+    option (google.api.http) = {
+      put: "/v1/recipes/{id}"
+      body: "*"
+    };
+  }
+
+  // Delete a recipe
+  rpc DeleteRecipe(DeleteRecipeRequest) returns (DeleteRecipeResponse) {
+    option (google.api.http) = {delete: "/v1/recipes/{id}"};
+  }
+}
+
+// Recipe message to represent the recipe.
+message Recipe {
+  string id = 1; // Unique identifier for the recipe.
+  string name = 2; // Name of the recipe (e.g. Chocolate Chip Cookies).
+  string chef = 3; // Chef of the reipe (e.g. Betty Crocker).
+  string cookbook = 4; // Cookbook where the recipe instructions are found (e.g. Salt, Fat, Acid, Heat).
+  repeated RecipeIngredient ingredients = 5; // Ingredients required for the recipe (e.g. Butter, Flour, etc.).
+}
+
+// Ingredient message to represent the ingredient data.
+message RecipeIngredient {
+  string ingredient_id = 1; // Ingredient ID from Ingredient service
+  string name = 2; // Name of the ingredient (e.g. Butter).
+  float amount = 3; // Amount (e.g. 1.25, 4).
+  Measurement measurement = 4; // Unit of measurement (e.g. cup, tbsp).
+}
+
+// Enum for units of measurement.
+enum Measurement {
+  MEASUREMENT_UNSPECIFIED = 0;
+  MEASUREMENT_UNIT = 1;
+  MEASUREMENT_TSP = 2;
+  MEASUREMENT_TBSP = 3;
+  MEASUREMENT_CUP = 4;
+  MEASUREMENT_MILLILITER = 6;
+  MEASUREMENT_LITER = 5;
+  MEASUREMENT_GRAM = 7;
+}
+
+// Request message for creating a recipe.
+message CreateRecipeRequest {
+  Recipe recipe = 1; // The recipe to create.
+}
+
+// Response message for an ingredient.
+message CreateRecipeResponse {
+  Recipe recipe = 1;
+}
+
+// Request message for fetching a recipe by its ID.
+message GetRecipeRequest {
+  string id = 1; // ID of the recipe to fetch.
+}
+
+// Response message for an ingredient.
+message GetRecipeResponse {
+  Recipe recipe = 1;
+}
+
+// Request message for listing recipes.
+message ListRecipesRequest {
+  int32 limit = 1; // Optional limit for pagination
+  int32 offset = 2; // Optional offset for pagination
+}
+
+// Response message for returning the ingredients list.
+message ListRecipesResponse {
+  repeated Recipe recipes = 1; // List of recipes.
+}
+
+// Request message for updating a recipe by its ID.
+message UpdateRecipeRequest {
+  string id = 1; // Recipe ID to update
+  string name = 2; // New name for the recipe
+  repeated RecipeIngredient ingredients = 3; // Updated list of ingredients
+}
+
+// Response message for an ingredient.
+message UpdateRecipeResponse {
+  Recipe recipe = 1;
+}
+
+message DeleteRecipeRequest {
+  string id = 1; // Recipe ID to delete
+}
+
+// DeleteRecipeResponse message
+message DeleteRecipeResponse {}

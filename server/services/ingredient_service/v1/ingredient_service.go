@@ -12,9 +12,9 @@ type IngredientServer struct {
 	ingredientpb.UnimplementedIngredientServiceServer
 }
 
-func (s IngredientServer) CreateIngredient(context.Context, *ingredientpb.CreateIngredientRequest) (*ingredientpb.IngredientResponse, error) {
+func (s IngredientServer) CreateIngredient(context.Context, *ingredientpb.CreateIngredientRequest) (*ingredientpb.CreateIngredientResponse, error) {
 
-	return &ingredientpb.IngredientResponse{
+	return &ingredientpb.CreateIngredientResponse{
 		Ingredient: &ingredientpb.Ingredient{
 			Id:   "1",
 			Name: "Water",
@@ -22,9 +22,9 @@ func (s IngredientServer) CreateIngredient(context.Context, *ingredientpb.Create
 	}, nil
 }
 
-func (s IngredientServer) GetIngredient(context.Context, *ingredientpb.GetIngredientRequest) (*ingredientpb.IngredientResponse, error) {
+func (s IngredientServer) GetIngredient(context.Context, *ingredientpb.GetIngredientRequest) (*ingredientpb.GetIngredientResponse, error) {
 
-	return &ingredientpb.IngredientResponse{
+	return &ingredientpb.GetIngredientResponse{
 		Ingredient: &ingredientpb.Ingredient{
 			Id:   "1",
 			Name: "Water",
@@ -35,9 +35,9 @@ func (s IngredientServer) GetIngredient(context.Context, *ingredientpb.GetIngred
 func (s IngredientServer) ListIngredients(context.Context, *ingredientpb.ListIngredientsRequest) (*ingredientpb.ListIngredientsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListIngredients not implemented")
 }
-func (s IngredientServer) UpdateIngredient(context.Context, *ingredientpb.UpdateIngredientRequest) (*ingredientpb.IngredientResponse, error) {
+func (s IngredientServer) UpdateIngredient(context.Context, *ingredientpb.UpdateIngredientRequest) (*ingredientpb.UpdateIngredientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateIngredient not implemented")
 }
-func (s IngredientServer) DeleteIngredient(context.Context, *ingredientpb.DeleteIngredientRequest) (*ingredientpb.Empty, error) {
+func (s IngredientServer) DeleteIngredient(context.Context, *ingredientpb.DeleteIngredientRequest) (*ingredientpb.DeleteIngredientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteIngredient not implemented")
 }

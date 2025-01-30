@@ -31,15 +31,15 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IngredientServiceClient interface {
 	// Creates an ingredient
-	CreateIngredient(ctx context.Context, in *CreateIngredientRequest, opts ...grpc.CallOption) (*IngredientResponse, error)
+	CreateIngredient(ctx context.Context, in *CreateIngredientRequest, opts ...grpc.CallOption) (*CreateIngredientResponse, error)
 	// Gets an ingredient
-	GetIngredient(ctx context.Context, in *GetIngredientRequest, opts ...grpc.CallOption) (*IngredientResponse, error)
+	GetIngredient(ctx context.Context, in *GetIngredientRequest, opts ...grpc.CallOption) (*GetIngredientResponse, error)
 	// Lists ingredients
 	ListIngredients(ctx context.Context, in *ListIngredientsRequest, opts ...grpc.CallOption) (*ListIngredientsResponse, error)
 	// Updates an ingredient
-	UpdateIngredient(ctx context.Context, in *UpdateIngredientRequest, opts ...grpc.CallOption) (*IngredientResponse, error)
+	UpdateIngredient(ctx context.Context, in *UpdateIngredientRequest, opts ...grpc.CallOption) (*UpdateIngredientResponse, error)
 	// Deletes an Ingredient
-	DeleteIngredient(ctx context.Context, in *DeleteIngredientRequest, opts ...grpc.CallOption) (*Empty, error)
+	DeleteIngredient(ctx context.Context, in *DeleteIngredientRequest, opts ...grpc.CallOption) (*DeleteIngredientResponse, error)
 }
 
 type ingredientServiceClient struct {
@@ -50,9 +50,9 @@ func NewIngredientServiceClient(cc grpc.ClientConnInterface) IngredientServiceCl
 	return &ingredientServiceClient{cc}
 }
 
-func (c *ingredientServiceClient) CreateIngredient(ctx context.Context, in *CreateIngredientRequest, opts ...grpc.CallOption) (*IngredientResponse, error) {
+func (c *ingredientServiceClient) CreateIngredient(ctx context.Context, in *CreateIngredientRequest, opts ...grpc.CallOption) (*CreateIngredientResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(IngredientResponse)
+	out := new(CreateIngredientResponse)
 	err := c.cc.Invoke(ctx, IngredientService_CreateIngredient_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -60,9 +60,9 @@ func (c *ingredientServiceClient) CreateIngredient(ctx context.Context, in *Crea
 	return out, nil
 }
 
-func (c *ingredientServiceClient) GetIngredient(ctx context.Context, in *GetIngredientRequest, opts ...grpc.CallOption) (*IngredientResponse, error) {
+func (c *ingredientServiceClient) GetIngredient(ctx context.Context, in *GetIngredientRequest, opts ...grpc.CallOption) (*GetIngredientResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(IngredientResponse)
+	out := new(GetIngredientResponse)
 	err := c.cc.Invoke(ctx, IngredientService_GetIngredient_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -80,9 +80,9 @@ func (c *ingredientServiceClient) ListIngredients(ctx context.Context, in *ListI
 	return out, nil
 }
 
-func (c *ingredientServiceClient) UpdateIngredient(ctx context.Context, in *UpdateIngredientRequest, opts ...grpc.CallOption) (*IngredientResponse, error) {
+func (c *ingredientServiceClient) UpdateIngredient(ctx context.Context, in *UpdateIngredientRequest, opts ...grpc.CallOption) (*UpdateIngredientResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(IngredientResponse)
+	out := new(UpdateIngredientResponse)
 	err := c.cc.Invoke(ctx, IngredientService_UpdateIngredient_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -90,9 +90,9 @@ func (c *ingredientServiceClient) UpdateIngredient(ctx context.Context, in *Upda
 	return out, nil
 }
 
-func (c *ingredientServiceClient) DeleteIngredient(ctx context.Context, in *DeleteIngredientRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *ingredientServiceClient) DeleteIngredient(ctx context.Context, in *DeleteIngredientRequest, opts ...grpc.CallOption) (*DeleteIngredientResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
+	out := new(DeleteIngredientResponse)
 	err := c.cc.Invoke(ctx, IngredientService_DeleteIngredient_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -105,15 +105,15 @@ func (c *ingredientServiceClient) DeleteIngredient(ctx context.Context, in *Dele
 // for forward compatibility.
 type IngredientServiceServer interface {
 	// Creates an ingredient
-	CreateIngredient(context.Context, *CreateIngredientRequest) (*IngredientResponse, error)
+	CreateIngredient(context.Context, *CreateIngredientRequest) (*CreateIngredientResponse, error)
 	// Gets an ingredient
-	GetIngredient(context.Context, *GetIngredientRequest) (*IngredientResponse, error)
+	GetIngredient(context.Context, *GetIngredientRequest) (*GetIngredientResponse, error)
 	// Lists ingredients
 	ListIngredients(context.Context, *ListIngredientsRequest) (*ListIngredientsResponse, error)
 	// Updates an ingredient
-	UpdateIngredient(context.Context, *UpdateIngredientRequest) (*IngredientResponse, error)
+	UpdateIngredient(context.Context, *UpdateIngredientRequest) (*UpdateIngredientResponse, error)
 	// Deletes an Ingredient
-	DeleteIngredient(context.Context, *DeleteIngredientRequest) (*Empty, error)
+	DeleteIngredient(context.Context, *DeleteIngredientRequest) (*DeleteIngredientResponse, error)
 	mustEmbedUnimplementedIngredientServiceServer()
 }
 
@@ -124,19 +124,19 @@ type IngredientServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedIngredientServiceServer struct{}
 
-func (UnimplementedIngredientServiceServer) CreateIngredient(context.Context, *CreateIngredientRequest) (*IngredientResponse, error) {
+func (UnimplementedIngredientServiceServer) CreateIngredient(context.Context, *CreateIngredientRequest) (*CreateIngredientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateIngredient not implemented")
 }
-func (UnimplementedIngredientServiceServer) GetIngredient(context.Context, *GetIngredientRequest) (*IngredientResponse, error) {
+func (UnimplementedIngredientServiceServer) GetIngredient(context.Context, *GetIngredientRequest) (*GetIngredientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetIngredient not implemented")
 }
 func (UnimplementedIngredientServiceServer) ListIngredients(context.Context, *ListIngredientsRequest) (*ListIngredientsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListIngredients not implemented")
 }
-func (UnimplementedIngredientServiceServer) UpdateIngredient(context.Context, *UpdateIngredientRequest) (*IngredientResponse, error) {
+func (UnimplementedIngredientServiceServer) UpdateIngredient(context.Context, *UpdateIngredientRequest) (*UpdateIngredientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateIngredient not implemented")
 }
-func (UnimplementedIngredientServiceServer) DeleteIngredient(context.Context, *DeleteIngredientRequest) (*Empty, error) {
+func (UnimplementedIngredientServiceServer) DeleteIngredient(context.Context, *DeleteIngredientRequest) (*DeleteIngredientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteIngredient not implemented")
 }
 func (UnimplementedIngredientServiceServer) mustEmbedUnimplementedIngredientServiceServer() {}

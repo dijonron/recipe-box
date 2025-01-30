@@ -4,8 +4,7 @@ deps:
   - buf.build/googleapis/googleapis
 
 modules:
-  - path: proto
+  - path: api/proto
 lint:
   use:
     - STANDARD
-    - COMPONENTS
