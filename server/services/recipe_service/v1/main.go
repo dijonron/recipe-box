@@ -10,9 +10,10 @@ import (
 
 func main() {
 	service := common.CreateService()
+	db := service.ConnectToDB()
 
 	_, err := service.Serve(func(server *grpc.Server) {
-		recipepb.RegisterRecipeServiceServer(server, &RecipeServer{})
+		recipepb.RegisterRecipeServiceServer(server, &RecipeServer{db: db})
 	})
 
 	if err != nil {

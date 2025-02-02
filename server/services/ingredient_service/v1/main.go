@@ -10,13 +10,15 @@ import (
 
 func main() {
 	service := common.CreateService()
+	db := service.ConnectToDB()
 
 	_, err := service.Serve(func(server *grpc.Server) {
-		ingredientpb.RegisterIngredientServiceServer(server, &IngredientServer{})
+		ingredientpb.RegisterIngredientServiceServer(server, &IngredientServer{db: db})
 	})
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	defer db.Close()
 }

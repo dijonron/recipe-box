@@ -1,6 +1,8 @@
 syntax = "proto3";
 package ingredient_service.v1;
 
+import "google/api/annotations.proto";
+
 option go_package = "server/generated/proto/ingredient_service/v1/ingredientpb";
 
 service IngredientService {
@@ -11,7 +13,9 @@ service IngredientService {
   rpc GetIngredient(GetIngredientRequest) returns (GetIngredientResponse);
 
   // Lists ingredients
-  rpc ListIngredients(ListIngredientsRequest) returns (ListIngredientsResponse);
+  rpc ListIngredients(ListIngredientsRequest) returns (ListIngredientsResponse) {
+    option (google.api.http) = {get: "/v1/ingredients"};
+  }
 
   // Updates an ingredient
   rpc UpdateIngredient(UpdateIngredientRequest) returns (UpdateIngredientResponse);
@@ -47,10 +51,7 @@ message GetIngredientResponse {
 }
 
 // Request message for listing ingredients by its ID.
-message ListIngredientsRequest {
-  int32 limit = 1; // Optional limit for pagination.
-  int32 offset = 2; // Optional offset for pagination.
-}
+message ListIngredientsRequest {}
 
 // Response message for returning the ingredients list.
 message ListIngredientsResponse {
