@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
@@ -21,15 +21,32 @@ import { MEASURMENT } from "../../utils/constants";
 function RecipeModal(props) {
   const { open = false, handleClose } = props;
 
+  const [ingredients, setIngredients] = useState([]);
+
   const formik = useFormik({
     initialValues: {
       name: "",
       chef: "",
       cookbook: "",
       ingredients: [
-        { id: 0, name: "", amount: 1, measurement: "" },
-        { id: 0, name: "", amount: 1, measurement: "" },
-        { id: 0, name: "", amount: 1, measurement: "" },
+        {
+          ingredient_id: "",
+          name: "",
+          amount: 1,
+          measurement: "",
+        },
+        {
+          ingredient_id: "",
+          name: "",
+          amount: 1,
+          measurement: "",
+        },
+        {
+          ingredient_id: "",
+          name: "",
+          amount: 1,
+          measurement: "",
+        },
       ],
     },
     onSubmit: async (values) => {
@@ -40,7 +57,7 @@ function RecipeModal(props) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ values }),
+          body: JSON.stringify({ recipe: values }),
         }
       );
 
@@ -48,6 +65,28 @@ function RecipeModal(props) {
       console.log(data);
     },
   });
+
+  useEffect(() => {
+    const fetchIngredients = async () => {
+      const res = await fetch(
+        `${process.env.REACT_APP_GATEWAY_URL}/v1/ingredients`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Network error");
+      }
+
+      const { ingredients } = await res.json();
+
+      setIngredients(ingredients);
+    };
+
+    fetchIngredients();
+  }, []);
 
   return (
     <Dialog open={open} onClose={handleClose}>
@@ -113,20 +152,40 @@ function RecipeModal(props) {
                     <Autocomplete
                       disablePortal
                       freeSolo
-                      options={["flour"]}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          id={`ingredients-${i}-name`}
-                          name={`ingredients.${i}.name`}
-                          label="Ingredient"
-                          variant="standard"
-                          fullWidth
-                          value={formik.values.ingredients[i].name}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                        />
-                      )}
+                      filterSelectedOptions
+                      options={ingredients}
+                      id={`ingredients-${i}-name`}
+                      name={`ingredients.${i}.name`}
+                      value={formik.values.ingredients[i]}
+                      onChange={(_, newValue) => {
+                        formik.setFieldValue(
+                          `ingredients.${i}.name`,
+                          newValue?.name ?? ""
+                        );
+                        formik.setFieldValue(
+                          `ingredients.${i}.ingredient_id`,
+                          newValue?.id ?? ""
+                        );
+                      }}
+                      onInputChange={(_, newValue) => {
+                        formik.setFieldValue(
+                          `ingredients.${i}.name`,
+                          newValue ?? ""
+                        );
+                      }}
+                      onBlur={formik.handleBlur}
+                      getOptionLabel={({ name }) => name}
+                      getOptionKey={({ ingredient_id }) => ingredient_id}
+                      renderInput={(params) => {
+                        return (
+                          <TextField
+                            {...params}
+                            label="Ingredient"
+                            variant="standard"
+                            fullWidth
+                          />
+                        );
+                      }}
                     />
                   </Grid>
                   <Grid size={2}>

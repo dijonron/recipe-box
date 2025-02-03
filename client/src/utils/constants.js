@@ -1,9 +1,9 @@
 export const MEASURMENT = {
-  UNIT: "Item",
-  TSP: "Tsp",
-  TBSP: "Tbsp",
-  CUP: "Cup(s)",
-  MILLILITER: " mL",
-  LITER: "L",
-  GRAM: "g",
+  MEASUREMENT_UNIT: "Item",
+  MEASUREMENT_TSP: "Tsp",
+  MEASUREMENT_TBSP: "Tbsp",
+  MEASUREMENT_CUP: "Cup(s)",
+  MEASUREMENT_MILLILITER: " mL",
+  MEASUREMENT_LITER: "L",
+  MEASUREMENT_GRAM: "g",
 };
