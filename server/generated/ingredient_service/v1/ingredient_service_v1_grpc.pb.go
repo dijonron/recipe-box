@@ -19,19 +19,19 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	IngredientService_CreateIngredient_FullMethodName = "/ingredient_service.v1.IngredientService/CreateIngredient"
-	IngredientService_GetIngredient_FullMethodName    = "/ingredient_service.v1.IngredientService/GetIngredient"
-	IngredientService_ListIngredients_FullMethodName  = "/ingredient_service.v1.IngredientService/ListIngredients"
-	IngredientService_UpdateIngredient_FullMethodName = "/ingredient_service.v1.IngredientService/UpdateIngredient"
-	IngredientService_DeleteIngredient_FullMethodName = "/ingredient_service.v1.IngredientService/DeleteIngredient"
+	IngredientService_CreateIngredientsForRecipe_FullMethodName = "/ingredient_service.v1.IngredientService/CreateIngredientsForRecipe"
+	IngredientService_GetIngredient_FullMethodName              = "/ingredient_service.v1.IngredientService/GetIngredient"
+	IngredientService_ListIngredients_FullMethodName            = "/ingredient_service.v1.IngredientService/ListIngredients"
+	IngredientService_UpdateIngredient_FullMethodName           = "/ingredient_service.v1.IngredientService/UpdateIngredient"
+	IngredientService_DeleteIngredient_FullMethodName           = "/ingredient_service.v1.IngredientService/DeleteIngredient"
 )
 
 // IngredientServiceClient is the client API for IngredientService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IngredientServiceClient interface {
-	// Creates an ingredient
-	CreateIngredient(ctx context.Context, in *CreateIngredientRequest, opts ...grpc.CallOption) (*CreateIngredientResponse, error)
+	// Creates ingredients for a recipe.
+	CreateIngredientsForRecipe(ctx context.Context, in *CreateIngredientsForRecipeRequest, opts ...grpc.CallOption) (*CreateIngredientsForRecipeResponse, error)
 	// Gets an ingredient
 	GetIngredient(ctx context.Context, in *GetIngredientRequest, opts ...grpc.CallOption) (*GetIngredientResponse, error)
 	// Lists ingredients
@@ -50,10 +50,10 @@ func NewIngredientServiceClient(cc grpc.ClientConnInterface) IngredientServiceCl
 	return &ingredientServiceClient{cc}
 }
 
-func (c *ingredientServiceClient) CreateIngredient(ctx context.Context, in *CreateIngredientRequest, opts ...grpc.CallOption) (*CreateIngredientResponse, error) {
+func (c *ingredientServiceClient) CreateIngredientsForRecipe(ctx context.Context, in *CreateIngredientsForRecipeRequest, opts ...grpc.CallOption) (*CreateIngredientsForRecipeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateIngredientResponse)
-	err := c.cc.Invoke(ctx, IngredientService_CreateIngredient_FullMethodName, in, out, cOpts...)
+	out := new(CreateIngredientsForRecipeResponse)
+	err := c.cc.Invoke(ctx, IngredientService_CreateIngredientsForRecipe_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +104,8 @@ func (c *ingredientServiceClient) DeleteIngredient(ctx context.Context, in *Dele
 // All implementations must embed UnimplementedIngredientServiceServer
 // for forward compatibility.
 type IngredientServiceServer interface {
-	// Creates an ingredient
-	CreateIngredient(context.Context, *CreateIngredientRequest) (*CreateIngredientResponse, error)
+	// Creates ingredients for a recipe.
+	CreateIngredientsForRecipe(context.Context, *CreateIngredientsForRecipeRequest) (*CreateIngredientsForRecipeResponse, error)
 	// Gets an ingredient
 	GetIngredient(context.Context, *GetIngredientRequest) (*GetIngredientResponse, error)
 	// Lists ingredients
@@ -124,8 +124,8 @@ type IngredientServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedIngredientServiceServer struct{}
 
-func (UnimplementedIngredientServiceServer) CreateIngredient(context.Context, *CreateIngredientRequest) (*CreateIngredientResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateIngredient not implemented")
+func (UnimplementedIngredientServiceServer) CreateIngredientsForRecipe(context.Context, *CreateIngredientsForRecipeRequest) (*CreateIngredientsForRecipeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateIngredientsForRecipe not implemented")
 }
 func (UnimplementedIngredientServiceServer) GetIngredient(context.Context, *GetIngredientRequest) (*GetIngredientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetIngredient not implemented")
@@ -160,20 +160,20 @@ func RegisterIngredientServiceServer(s grpc.ServiceRegistrar, srv IngredientServ
 	s.RegisterService(&IngredientService_ServiceDesc, srv)
 }
 
-func _IngredientService_CreateIngredient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateIngredientRequest)
+func _IngredientService_CreateIngredientsForRecipe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateIngredientsForRecipeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(IngredientServiceServer).CreateIngredient(ctx, in)
+		return srv.(IngredientServiceServer).CreateIngredientsForRecipe(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: IngredientService_CreateIngredient_FullMethodName,
+		FullMethod: IngredientService_CreateIngredientsForRecipe_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IngredientServiceServer).CreateIngredient(ctx, req.(*CreateIngredientRequest))
+		return srv.(IngredientServiceServer).CreateIngredientsForRecipe(ctx, req.(*CreateIngredientsForRecipeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -258,8 +258,8 @@ var IngredientService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*IngredientServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateIngredient",
-			Handler:    _IngredientService_CreateIngredient_Handler,
+			MethodName: "CreateIngredientsForRecipe",
+			Handler:    _IngredientService_CreateIngredientsForRecipe_Handler,
 		},
 		{
 			MethodName: "GetIngredient",

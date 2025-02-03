@@ -32,28 +32,31 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to recipe service: %v", err)
 	}
-	defer connRecipe.Close()
 
 	connIngredient, err := grpc.NewClient(ingreientServiceURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to connect to recipe service: %v", err)
+		log.Fatalf("failed to connect to ingredient service: %v", err)
 	}
-	defer connIngredient.Close()
 
-	mux := runtime.NewServeMux()
-	ctx := context.Background()
+	gwmux := runtime.NewServeMux()
 
-	if err := recipepb.RegisterRecipeServiceHandlerFromEndpoint(ctx, mux, recipeServiceURL, []grpc.DialOption{grpc.WithInsecure()}); err != nil {
+	err = recipepb.RegisterRecipeServiceHandler(context.Background(), gwmux, connRecipe)
+	if err != nil {
 		log.Fatalln("Failed to register gateway:", err)
 	}
 
-	if err := ingredientpb.RegisterIngredientServiceHandlerFromEndpoint(ctx, mux, ingreientServiceURL, []grpc.DialOption{grpc.WithInsecure()}); err != nil {
+	err = ingredientpb.RegisterIngredientServiceHandler(context.Background(), gwmux, connIngredient)
+	if err != nil {
 		log.Fatalln("Failed to register gateway:", err)
 	}
 
-	http.Handle("/", withCORS(mux))
-	log.Printf("Starting HTTP server on port %d ...", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
+	gwServer := &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: withCORS(gwmux),
+	}
+
+	log.Printf("Serving gRPC-Gateway on port %d ...", port)
+	log.Fatalln(gwServer.ListenAndServe())
 }
 
 func withCORS(next http.Handler) http.Handler {
