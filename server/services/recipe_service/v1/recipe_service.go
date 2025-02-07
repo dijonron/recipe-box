@@ -7,6 +7,7 @@ import (
 
 	ingredientpb "github.com/dijonron/recipe-box/server/generated/ingredient_service/v1"
 	recipepb "github.com/dijonron/recipe-box/server/generated/recipe_service/v1"
+	utils "github.com/dijonron/recipe-box/server/internal"
 	recipe_persistence "github.com/dijonron/recipe-box/server/services/recipe_service/v1/persistence"
 	"github.com/google/uuid"
 
@@ -36,8 +37,8 @@ func (s RecipeServer) CreateRecipe(ctx context.Context, req *recipepb.CreateReci
 	}
 
 	ingredients := req.GetRecipe().Ingredients
-	var newIngredients []string   // ingredients that do not have an id
-	var ingredientsToAdd []string // ids of existing ingredients
+	var newIngredients []string                                // ingredients that do not have an id
+	var ingredientsToAdd []recipe_persistence.RecipeIngredient // ids of existing ingredients
 
 	for _, ingredient := range ingredients {
 		if ingredient.IngredientId == "" {
@@ -47,7 +48,11 @@ func (s RecipeServer) CreateRecipe(ctx context.Context, req *recipepb.CreateReci
 
 	for _, ingredient := range ingredients {
 		if ingredient.IngredientId != "" {
-			ingredientsToAdd = append(ingredientsToAdd, ingredient.IngredientId)
+			id, err := uuid.Parse(ingredient.IngredientId)
+			if err != nil {
+				log.Fatalf("Failed to parse UUID: %v", err)
+			}
+			ingredientsToAdd = append(ingredientsToAdd, recipe_persistence.RecipeIngredient{IngredientId: id, Amount: float64(ingredient.Amount), Measurement: recipe_persistence.Measurement(ingredient.Measurement)})
 		}
 	}
 
@@ -71,22 +76,27 @@ func (s RecipeServer) CreateRecipe(ctx context.Context, req *recipepb.CreateReci
 			log.Fatalf("could not save new ingredients: %v", err)
 		}
 		for _, ingredient := range saved.Ingredients {
-			ingredientsToAdd = append(ingredientsToAdd, ingredient.Id)
+			id, err := uuid.Parse(ingredient.Id)
+			if err != nil {
+				log.Fatalf("Failed to parse UUID: %v", err)
+			}
+
+			matchIng := utils.Filter(ingredients, func(s *recipepb.RecipeIngredient) bool { return s.Name == ingredient.Name })
+			amount := matchIng[0].Amount
+			measurement := matchIng[0].Measurement
+			ingredientsToAdd = append(ingredientsToAdd, recipe_persistence.RecipeIngredient{IngredientId: id, Amount: float64(amount), Measurement: recipe_persistence.Measurement(measurement)})
 		}
 	}
 
 	// save recipe ingredients
 	var recipeIngredints []recipe_persistence.RecipeIngredient
 	for _, ing := range ingredientsToAdd {
-		ingId, err := uuid.Parse(ing)
-		if err != nil {
-			log.Fatalf("Failed to parse UUID: %v", err)
-		}
+
 		recId, err := uuid.Parse(saved.Id)
 		if err != nil {
 			log.Fatalf("Failed to parse UUID: %v", err)
 		}
-		recipeIngredints = append(recipeIngredints, recipe_persistence.RecipeIngredient{IngredientId: ingId, RecipeID: recId})
+		recipeIngredints = append(recipeIngredints, recipe_persistence.RecipeIngredient{RecipeID: recId, IngredientId: ing.IngredientId, Amount: ing.Amount, Measurement: ing.Measurement})
 	}
 
 	err = recipe_persistence.WriteRecipeIngredients(recipeIngredints, s.db)
