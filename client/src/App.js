@@ -17,6 +17,7 @@ import {
 import DarkModeSwitch from "./components/DarkModeSwitch/DarkModeSwitch";
 import { TabProvider, useTab } from "./contexts/TabContext";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
+import { SnackbarProvider } from "./contexts/SnackbarContext";
 
 function App() {
   const { isDarkMode } = useTheme();
@@ -72,9 +73,11 @@ function App() {
 export default function AppWrapper() {
   return (
     <ThemeProvider>
-      <TabProvider>
-        <App />
-      </TabProvider>
+      <SnackbarProvider>
+        <TabProvider>
+          <App />
+        </TabProvider>
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }
