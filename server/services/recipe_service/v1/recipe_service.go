@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -107,16 +108,61 @@ func (s RecipeServer) CreateRecipe(ctx context.Context, req *recipepb.CreateReci
 	return nil, nil
 }
 
-func (s RecipeServer) GetRecipe(ctx context.Context, req *recipepb.GetRecipeRequest) (*recipepb.GetRecipeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRecipe not implemented")
+func (s RecipeServer) ListRecipes(ctx context.Context, req *recipepb.ListRecipesRequest) (*recipepb.ListRecipesResponse, error) {
+	var recipes []recipe_persistence.Recipe
+
+	err := s.db.Select(&recipes, "SELECT id, name, chef FROM rs_recipes WHERE deleted_at IS NULL ORDER BY name ASC")
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch ingredients: %w", err)
+	}
+
+	response := &recipepb.ListRecipesResponse{
+		Recipes: make([]*recipepb.Recipe, len(recipes)),
+	}
+
+	for i, recipe := range recipes {
+		response.Recipes[i] = &recipepb.Recipe{
+			Id:   recipe.Id.String(),
+			Name: recipe.Name,
+			Chef: recipe.Chef,
+		}
+	}
+
+	return response, nil
 }
 
-func (s RecipeServer) ListRecipes(ctx context.Context, req *recipepb.ListRecipesRequest) (*recipepb.ListRecipesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListRecipes not implemented")
+func (s RecipeServer) DeleteRecipe(ctx context.Context, req *recipepb.DeleteRecipeRequest) (*recipepb.DeleteRecipeResponse, error) {
+	recipeId := req.Id
+
+	tx, err := s.db.Beginx()
+	if err != nil {
+		log.Println("Error starting transaction:", err)
+		return nil, fmt.Errorf("error starting transaction: %w", err)
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	// delete recipe ingredients
+	err = recipe_persistence.DeleteRecipeIngredients(recipeId, tx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "unable to delete recipe ingredients")
+	}
+
+	// delete recipe
+	err = recipe_persistence.DeleteRecipe(recipeId, tx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to delete recipe")
+	}
+
+	return nil, nil
 }
+
 func (s RecipeServer) UpdateRecipe(ctx context.Context, req *recipepb.UpdateRecipeRequest) (*recipepb.UpdateRecipeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateRecipe not implemented")
-}
-func (s RecipeServer) DeleteRecipe(ctx context.Context, req *recipepb.DeleteRecipeRequest) (*recipepb.DeleteRecipeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteRecipe not implemented")
 }

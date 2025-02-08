@@ -85,3 +85,35 @@ func WriteRecipeIngredients(ingredients []RecipeIngredient, db *sqlx.DB) error {
 
 	return nil
 }
+
+func DeleteRecipe(recipeId string, tx *sqlx.Tx) error {
+	query := `
+		UPDATE rs_recipes
+		SET deleted_at = CURRENT_TIMESTAMP
+		WHERE id = $1	
+	`
+
+	_, err := tx.Exec(query, recipeId)
+	if err != nil {
+		log.Println("Error deleting recipe:", err)
+		return fmt.Errorf("failed to delete recipe: %w", err)
+	}
+
+	return nil
+}
+
+func DeleteRecipeIngredients(recipeId string, tx *sqlx.Tx) error {
+	query := `
+		UPDATE rs_recipe_ingredients 
+		SET deleted_at = CURRENT_TIMESTAMP
+		WHERE recipe_id = $1	
+	`
+
+	_, err := tx.Exec(query, recipeId)
+	if err != nil {
+		log.Println("Error deleting ingredients:", err)
+		return fmt.Errorf("failed to delete ingredients: %w", err)
+	}
+
+	return nil
+}

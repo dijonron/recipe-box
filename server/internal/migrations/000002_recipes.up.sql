@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS rs_recipes (
 );
 
 CREATE TABLE IF NOT EXISTS rs_recipe_ingredients (
-    ingredient_id UUID PRIMARY KEY NOT NULL,                     
+    ingredient_id UUID NOT NULL,                     
     recipe_id UUID NOT NULL,                          
     amount FLOAT NOT NULL,                            
     measurement INT NOT NULL,                         
