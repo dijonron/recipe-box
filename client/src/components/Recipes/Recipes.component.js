@@ -15,10 +15,13 @@ import {
 import useFetch from "../../hooks/useFetch";
 import { RecipeModal } from "../RecipeModal";
 import DeleteModal from "../DeleteModal/DeleteModal.component";
+import { useSnackbar } from "../../contexts/SnackbarContext";
 
 function Recipies() {
   const [recipeModal, setRecipeModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
+
+  const { showSnackbar } = useSnackbar();
 
   const count = 15;
   const rowsPerPage = 5;
@@ -27,7 +30,7 @@ function Recipies() {
   const handleChangePage = () => {};
   const handleChangeRowsPerPage = () => {};
 
-  const { data, error, loading } = useFetch(
+  const { data, error, loading, refetch } = useFetch(
     `${process.env.REACT_APP_GATEWAY_URL}/v1/recipes`,
     {
       method: "GET",
@@ -35,22 +38,34 @@ function Recipies() {
     }
   );
 
-  const deleteRecipe = async ({ id }) => {
-    await fetch(`${process.env.REACT_APP_GATEWAY_URL}/v1/recipes/${id}`, {
-      method: "DELETE",
-    });
-
-    setDeleteModal(false);
-  };
-
   if (error) {
     return <>Error!</>;
   }
 
   const { recipes = [] } = data ?? {};
-
   const renderLoading = loading;
   const renderEmpty = !recipes.length;
+
+  const deleteRecipe = async ({ id }) => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_GATEWAY_URL}/v1/recipes/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      await refetch();
+      showSnackbar("Recipe deleted!", "success");
+    } catch (error) {
+      showSnackbar(`Unable to delete the recipe. ${error.message}`, "error");
+    } finally {
+      setDeleteModal(false);
+    }
+  };
 
   return (
     <>
@@ -68,7 +83,8 @@ function Recipies() {
       {recipeModal && (
         <RecipeModal
           open={recipeModal}
-          handleClose={() => {
+          handleClose={async () => {
+            await refetch();
             setRecipeModal(false);
           }}
         />
@@ -100,7 +116,7 @@ function Recipies() {
               </TableRow>
             ) : (
               recipes?.map((recipe) => (
-                <TableRow>
+                <TableRow key={`recipe-row--${recipe.id}`}>
                   <TableCell>{recipe.name}</TableCell>
                   <TableCell>{recipe.chef}</TableCell>
                   <TableCell align="right">
@@ -113,21 +129,11 @@ function Recipies() {
                       color="error"
                       variant="text"
                       onClick={() => {
-                        setDeleteModal(true);
+                        setDeleteModal(recipe);
                       }}
                     >
                       Delete
                     </Button>
-                    {deleteModal && (
-                      <DeleteModal
-                        recipe={recipe}
-                        open={deleteModal}
-                        handleClose={() => {
-                          setDeleteModal(false);
-                        }}
-                        handleSubmit={() => deleteRecipe(recipe)}
-                      />
-                    )}
                   </TableCell>
                 </TableRow>
               ))
@@ -144,6 +150,16 @@ function Recipies() {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
+      {deleteModal && (
+        <DeleteModal
+          recipe={deleteModal}
+          open={!!deleteModal}
+          handleClose={() => {
+            setDeleteModal(false);
+          }}
+          handleSubmit={() => deleteRecipe(deleteModal)}
+        />
+      )}
     </>
   );
 }
