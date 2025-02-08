@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment } from "react";
 import { useFormik } from "formik";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
@@ -17,11 +17,19 @@ import {
   Typography,
 } from "@mui/material";
 import { MEASURMENT } from "../../utils/constants";
+import useFetch from "../../hooks/useFetch";
 
 function RecipeModal(props) {
   const { open = false, handleClose } = props;
 
-  const [ingredients, setIngredients] = useState([]);
+  const { data, loading, error } = useFetch(
+    `${process.env.REACT_APP_GATEWAY_URL}/v1/ingredients`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  const { ingredients = [] } = data ?? {};
 
   const formik = useFormik({
     initialValues: {
@@ -50,48 +58,25 @@ function RecipeModal(props) {
       ],
     },
     onSubmit: async (values) => {
-      const res = await fetch(
-        `${process.env.REACT_APP_GATEWAY_URL}/v1/recipes`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ recipe: values }),
-        }
-      );
-
-      const data = await res.json();
-      console.log(data);
+      await fetch(`${process.env.REACT_APP_GATEWAY_URL}/v1/recipes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ recipe: values }),
+      });
+      handleClose();
     },
   });
 
-  useEffect(() => {
-    const fetchIngredients = async () => {
-      const res = await fetch(
-        `${process.env.REACT_APP_GATEWAY_URL}/v1/ingredients`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error("Network error");
-      }
-
-      const { ingredients } = await res.json();
-
-      setIngredients(ingredients);
-    };
-
-    fetchIngredients();
-  }, []);
+  if (error) {
+    return <>Error!</>;
+  }
 
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={handleClose} scroll="body">
       <DialogTitle>Fill in the recipe's details</DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ overflowX: "hidden" }}>
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={2}>
             <Grid size={12}>
@@ -150,13 +135,13 @@ function RecipeModal(props) {
                 <Fragment key={`ingredient-${i}`}>
                   <Grid size={6}>
                     <Autocomplete
-                      disablePortal
-                      freeSolo
-                      filterSelectedOptions
-                      options={ingredients}
                       id={`ingredients-${i}-name`}
                       name={`ingredients.${i}.name`}
                       value={formik.values.ingredients[i]}
+                      freeSolo
+                      filterSelectedOptions
+                      options={ingredients}
+                      loading={loading}
                       onChange={(_, newValue) => {
                         formik.setFieldValue(
                           `ingredients.${i}.name`,
@@ -247,7 +232,7 @@ function RecipeModal(props) {
                 onClick={() => {
                   formik.setFieldValue("ingredients", [
                     ...formik.values.ingredients,
-                    { id: 0, name: "", amount: 1, measurement: "" },
+                    { id: "", name: "", amount: 1, measurement: "" },
                   ]);
                 }}
                 startIcon={<AddIcon />}
@@ -271,7 +256,6 @@ function RecipeModal(props) {
               color="primary"
               variant="contained"
               type="submit"
-              // onClick={() => console.log("add recipe")}
             >
               Add Recipie
             </Button>
