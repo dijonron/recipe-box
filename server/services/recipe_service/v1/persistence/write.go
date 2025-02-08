@@ -10,22 +10,8 @@ import (
 	"github.com/lib/pq"
 )
 
-func WriteRecipe(recipe Recipe, db *sqlx.DB) (*recipepb.Recipe, error) {
+func WriteRecipe(recipe Recipe, tx *sqlx.Tx) (*recipepb.Recipe, error) {
 	var newRecipe []recipepb.Recipe
-
-	tx, err := db.Beginx()
-	if err != nil {
-		log.Println("Error starting transaction:", err)
-		return nil, fmt.Errorf("error starting transaction: %w", err)
-	}
-
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			err = tx.Commit()
-		}
-	}()
 
 	query := `
 		INSERT INTO rs_recipes (name, chef, cookbook)
@@ -33,7 +19,7 @@ func WriteRecipe(recipe Recipe, db *sqlx.DB) (*recipepb.Recipe, error) {
 		RETURNING id, name, chef, cookbook
 	`
 
-	err = tx.Select(&newRecipe, query, recipe.Name, recipe.Chef, recipe.Cookbook)
+	err := tx.Select(&newRecipe, query, recipe.Name, recipe.Chef, recipe.Cookbook)
 	if err != nil {
 		log.Println("Error inserting recipe:", err)
 		return nil, fmt.Errorf("failed to insert ingredients: %w", err)
@@ -42,22 +28,8 @@ func WriteRecipe(recipe Recipe, db *sqlx.DB) (*recipepb.Recipe, error) {
 	return &newRecipe[0], nil
 }
 
-func WriteRecipeIngredients(ingredients []RecipeIngredient, db *sqlx.DB) error {
+func WriteRecipeIngredients(ingredients []RecipeIngredient, tx *sqlx.Tx) error {
 	var insertedIngredients []recipepb.RecipeIngredient
-
-	tx, err := db.Beginx()
-	if err != nil {
-		log.Println("Error starting transaction:", err)
-		return nil
-	}
-
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			err = tx.Commit()
-		}
-	}()
 
 	query := `
 		INSERT INTO rs_recipe_ingredients (ingredient_id, recipe_id, amount, measurement)
@@ -77,7 +49,7 @@ func WriteRecipeIngredients(ingredients []RecipeIngredient, db *sqlx.DB) error {
 		measurement = append(measurement, float64(ing.Measurement))
 	}
 
-	err = tx.Select(&insertedIngredients, query, pq.Array(ingredientIds), pq.Array(recipeIds), pq.Array(amounts), pq.Array(measurement))
+	err := tx.Select(&insertedIngredients, query, pq.Array(ingredientIds), pq.Array(recipeIds), pq.Array(amounts), pq.Array(measurement))
 	if err != nil {
 		log.Println("Error inserting ingredients:", err)
 		return fmt.Errorf("failed to insert ingredients: %w", err)

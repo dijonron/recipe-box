@@ -9,6 +9,7 @@ import (
 	ingredientpb "github.com/dijonron/recipe-box/server/generated/ingredient_service/v1"
 	recipepb "github.com/dijonron/recipe-box/server/generated/recipe_service/v1"
 	utils "github.com/dijonron/recipe-box/server/internal"
+	"github.com/dijonron/recipe-box/server/internal/common"
 	recipe_persistence "github.com/dijonron/recipe-box/server/services/recipe_service/v1/persistence"
 	"github.com/google/uuid"
 
@@ -25,18 +26,33 @@ type RecipeServer struct {
 }
 
 func (s RecipeServer) CreateRecipe(ctx context.Context, req *recipepb.CreateRecipeRequest) (*recipepb.CreateRecipeResponse, error) {
+	// start tx manager
+	tx, err := s.db.Beginx()
+	if err != nil {
+		log.Println("Error starting transaction:", err)
+		return nil, fmt.Errorf("error starting transaction: %w", err)
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
 	// insert recipe
 	recipe := recipe_persistence.Recipe{
 		Name:     req.Recipe.GetName(),
 		Chef:     req.Recipe.GetChef(),
 		Cookbook: req.Recipe.GetCookbook(),
 	}
-
-	saved, err := recipe_persistence.WriteRecipe(recipe, s.db)
+	saved, err := recipe_persistence.WriteRecipe(recipe, tx)
 	if err != nil {
 		return nil, err
 	}
 
+	// format ingredients for inserting
 	ingredients := req.GetRecipe().Ingredients
 	var newIngredients []string                                // ingredients that do not have an id
 	var ingredientsToAdd []recipe_persistence.RecipeIngredient // ids of existing ingredients
@@ -58,6 +74,7 @@ func (s RecipeServer) CreateRecipe(ctx context.Context, req *recipepb.CreateReci
 	}
 
 	// insert any new ingredients
+	// TODO: wrap this in tx
 	if len(newIngredients) != 0 {
 		connIngredient, err := grpc.NewClient(os.Getenv("INGREDIENT_SERVICE_URL"), grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
@@ -72,7 +89,7 @@ func (s RecipeServer) CreateRecipe(ctx context.Context, req *recipepb.CreateReci
 			ingReq.Ingredients[i] = &ingredientpb.Ingredient{Name: newIng}
 		}
 
-		saved, err := ingredientClient.CreateIngredientsForRecipe(context.Background(), ingReq)
+		saved, err := ingredientClient.CreateIngredientsForRecipe(context.WithValue(context.Background(), common.TxKey, tx), ingReq)
 		if err != nil {
 			log.Fatalf("could not save new ingredients: %v", err)
 		}
@@ -100,7 +117,7 @@ func (s RecipeServer) CreateRecipe(ctx context.Context, req *recipepb.CreateReci
 		recipeIngredints = append(recipeIngredints, recipe_persistence.RecipeIngredient{RecipeID: recId, IngredientId: ing.IngredientId, Amount: ing.Amount, Measurement: ing.Measurement})
 	}
 
-	err = recipe_persistence.WriteRecipeIngredients(recipeIngredints, s.db)
+	err = recipe_persistence.WriteRecipeIngredients(recipeIngredints, tx)
 	if err != nil {
 		return nil, err
 	}

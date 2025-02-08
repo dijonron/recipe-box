@@ -8,6 +8,10 @@ import (
 
 var cfg serviceConfig
 
+type contextKey string
+
+const TxKey contextKey = "tx"
+
 type serviceConfig struct {
 	name        string
 	port        int

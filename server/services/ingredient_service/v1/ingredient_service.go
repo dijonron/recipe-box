@@ -6,7 +6,9 @@ import (
 	"log"
 
 	ingredientpb "github.com/dijonron/recipe-box/server/generated/ingredient_service/v1"
+	"github.com/dijonron/recipe-box/server/internal/common"
 	models "github.com/dijonron/recipe-box/server/services/ingredient_service/v1/persistence"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"google.golang.org/grpc/codes"
@@ -19,7 +21,11 @@ type IngredientServer struct {
 }
 
 func (s IngredientServer) CreateIngredientsForRecipe(ctx context.Context, req *ingredientpb.CreateIngredientsForRecipeRequest) (*ingredientpb.CreateIngredientsForRecipeResponse, error) {
-	fmt.Println("Hello!")
+	tx := ctx.Value(common.TxKey).(*sqlx.Tx)
+	if tx == nil {
+		return nil, fmt.Errorf("transaction not found in context")
+	}
+
 	// validate request
 	if len(req.GetIngredients()) == 0 {
 		return nil, fmt.Errorf("no ingredients provided")
@@ -31,22 +37,6 @@ func (s IngredientServer) CreateIngredientsForRecipe(ctx context.Context, req *i
 		ingredientNames = append(ingredientNames, ingredientReq.GetName())
 	}
 
-	// begin and handle txn
-	tx, err := s.db.Beginx()
-	if err != nil {
-		log.Println("Error starting transaction:", err)
-		return nil, err
-	}
-
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-
-		} else {
-			err = tx.Commit()
-		}
-	}()
-
 	// bulk insert ingredient names
 	var insertedIngredients []ingredientpb.Ingredient
 
@@ -56,7 +46,7 @@ func (s IngredientServer) CreateIngredientsForRecipe(ctx context.Context, req *i
 		RETURNING id, name
 	`
 
-	err = tx.Select(&insertedIngredients, query, pq.Array(ingredientNames))
+	err := tx.Select(&insertedIngredients, query, pq.Array(ingredientNames))
 	if err != nil {
 		log.Println("Error inserting ingredients:", err)
 		return nil, fmt.Errorf("failed to insert ingredients: %w", err)
