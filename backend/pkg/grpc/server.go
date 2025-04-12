@@ -1,32 +1,58 @@
 package grpc
 
 import (
-	"context"
+	"fmt"
 	"log/slog"
+	"net"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
-type Server interface {
-	Start(ctx context.Context)
-	Stop(ctx context.Context)
+type GrpcServer interface {
+	Serve() error
+	Stop()
 }
 
-type server struct {
-	grpcServer *grpc.Server
+type Register interface {
+	Register(server *grpc.Server)
 }
 
-func NewServer(cfg ServerConfig) *server {
-	return &server{
-		grpcServer: grpc.NewServer(),
+type grpcServer struct {
+	server *grpc.Server
+	port   string
+}
+
+var _ GrpcServer = (*grpcServer)(nil)
+
+func NewServer(cfg ServerConfig, registers []Register) GrpcServer {
+	gs := &grpcServer{
+		server: grpc.NewServer(),
+		port:   cfg.Port,
 	}
+
+	for _, r := range registers {
+		r.Register(gs.server)
+	}
+
+	if cfg.Reflection {
+		reflection.Register(gs.server)
+	}
+
+	return gs
 }
 
-func (s *server) Start(ctx context.Context) {
+func (g *grpcServer) Serve() error {
+	tcp, err := net.Listen("tcp", fmt.Sprintf(":%s", g.port))
+	if err != nil {
+		slog.Error("failed to listen", "error: ", err)
+		return err
+	}
 
+	return g.server.Serve(tcp)
 }
 
-func (s *server) Stop(ctx context.Context) {
-	s.grpcServer.GracefulStop()
+func (g *grpcServer) Stop() {
+	g.server.GracefulStop()
 	slog.Info("Server gracefully shut down")
 }

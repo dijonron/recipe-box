@@ -1,8 +1,11 @@
 syntax = "proto3";
+
 package auth;
 
+option go_package = "github.com/dijonron/recipe-box/proto/auth";
 
-service AuthService {
+
+service Auth{
   // Login the user.
   rpc Login (LoginRequest) returns (LoginResponse);
   // Validate the JWT token.

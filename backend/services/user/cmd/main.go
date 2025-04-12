@@ -1,62 +1,56 @@
-package user
+package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/dijonron/recipe-box/pkg/database"
-	"github.com/dijonron/recipe-box/pkg/grpc"
-	"github.com/jmoiron/sqlx"
+	"github.com/dijonron/recipe-box/pkg/config"
+	"github.com/dijonron/recipe-box/pkg/logger"
+
+	"github.com/dijonron/recipe-box/services/user/internal/service"
 )
 
 func main() {
-	cfg := GetConfig()
-	if cfg.Env == "local" {
-		slog.Info("loaded config", "config: ", cfg)
-	}
+	cfg := config.GetConfig()
+	logger := logger.NewLogger(cfg.LoggerConfig)
+	slog.Info(fmt.Sprintf("loaded config for %s service", cfg.ServiceName), "config", cfg)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	db, err := database.ConnectToDB(ctx, cfg.DatabaseConfig)
-	if err != nil {
-		os.Exit(1)
-	}
-	defer db.Close()
+	server := buildServer(ctx, cfg)
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
-	server := buildServer(cfg, db)
+	go handleShutdown(ch, cancel, server)
 
-	go handleShutdown(ch, ctx, cancel, server)
+	server.Start(ctx)
 
-	// startServer(ctx, httpServer)
-
-	// slog.Info("application terminated")
+	logger.Info("application terminated")
 }
 
-func buildServer(cfg Config, db *sqlx.DB) grpc.Server {
+func buildServer(ctx context.Context, cfg config.Config) service.Server {
+	// _, err := database.ConnectToDB(ctx, cfg.DatabaseConfig)
+	// if err != nil {
+	// 	os.Exit(1)
+	// }
+	// slog.Info("connected to db")
 
 	// userPersistence := up.NewUserPersistence(db)
 	// user := user.NewUserService(userPersistence)
 
-	server := grpc.NewServer(cfg.ServerConfig)
+	server := service.NewUserServer(cfg.ServerConfig)
 
 	return server
 }
 
-func handleShutdown(ch <-chan os.Signal, ctx context.Context, cancel context.CancelFunc, server grpc.Server) {
+func handleShutdown(ch <-chan os.Signal, cancel context.CancelFunc, server service.Server) {
 	<-ch
-	server.Stop(ctx)
+	server.Stop()
 	cancel()
-}
-
-func startServer(ctx context.Context, httpServer grpc.Server) {
-	go httpServer.Start(ctx)
-
-	<-ctx.Done()
 }

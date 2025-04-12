@@ -1,8 +1,10 @@
 syntax = "proto3";
-package user;
-option go_package = "github.com/yourusername/myapp/proto/user";
 
-service UserService {
+package user;
+
+option go_package = "github.com/dijonron/recipe-box/proto/user";
+
+service User {
   // Create a new user.
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
   // Get user details by user ID.
@@ -14,7 +16,7 @@ message GetUserRequest {
 }
 
 message GetUserResponse {
-  User user = 1;
+  UserDetails user = 1;
   bool success = 2;
   string error_message = 3;
 }
@@ -31,7 +33,7 @@ message CreateUserResponse {
   string error_message = 3;
 }
 
-message User {
+message UserDetails {
   string id = 1;
   string username = 2;
   string email = 3;

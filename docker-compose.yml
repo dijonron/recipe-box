@@ -1,80 +1,9 @@
 services:
-  client:
-    container_name: client
+  user:
     build:
-      context: ./client
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
-    networks:
-      - app-network
-    depends_on:
-      - api_gateway
-    env_file:
-      - client/.env
-
-  api_gateway:
-    container_name: api_gateway
-    build:
-      context: ./server
-      dockerfile: api/Dockerfile
-    ports:
-      - "3000:3000"
-    networks:
-      - app-network
-    env_file:
-      - server/api/.env
-    depends_on:
-      - ingredient_service
-      - recipe_service
-
-  ingredient_service:
-    container_name: ingredient_service
-    build:
-      context: ./server
-      dockerfile: services/ingredient_service/v1/Dockerfile
+      context: ./backend
+      dockerfile: services/user/Dockerfile
     ports:
       - "50051:50051"
-    networks:
-      - app-network
     env_file:
-      - server/services/ingredient_service/v1/.env
-    depends_on:
-      - database
-
-  recipe_service:
-    container_name: recipe_service
-    build:
-      context: ./server
-      dockerfile: services/recipe_service/v1/Dockerfile
-    ports:
-      - "50052:50052"
-    networks:
-      - app-network
-    env_file:
-      - server/services/recipe_service/v1/.env
-    depends_on:
-      - database
-
-  database:
-    image: postgres:13
-    container_name: database
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
-    networks:
-      - app-network
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-    driver: local
-
-networks:
-  app-network:
-    driver: bridge
+      - backend/services/user/.env
