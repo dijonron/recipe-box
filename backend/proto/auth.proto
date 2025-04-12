@@ -1,0 +1,38 @@
+syntax = "proto3";
+package auth;
+
+
+service AuthService {
+  // Login the user.
+  rpc Login (LoginRequest) returns (LoginResponse);
+  // Validate the JWT token.
+  rpc Validate (ValidateRequest) returns (ValidateResponse);
+}
+
+message LoginRequest {
+  // Reqiured: The user's emaail address.
+  string email = 1;
+  // Required: The user's password
+  string password = 2;
+}
+
+message LoginResponse {
+  // Required: The JWT token for the authenticated user.
+  string token = 1;
+  // Required: A boolean indicating whether the login was successful. True if successful, false otherwise.
+  bool success = 2;
+  // An optional error message. This field is only set if success is false.
+  string error_message = 3;
+}
+
+message ValidateRequest {
+  // Required: the JWT toekn to be validated.
+  string token = 1;
+}
+
+message ValidateResponse {
+  // Required: A boolean indicating whether the token is valid. True if valid, false otherwise.
+  bool valid = 1;
+  // Required: The user ID associated with the token.
+  string user_id = 2;
+}

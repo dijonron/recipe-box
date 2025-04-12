@@ -1,20 +1,14 @@
-module github.com/dijonron/recipe-box/server
+module github.com/dijonron/recipe-box
 
-go 1.23.5
+go 1.24.1
+
+require google.golang.org/grpc v1.71.1
 
 require (
-	github.com/google/uuid v1.6.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.0
 	github.com/jmoiron/sqlx v1.4.0
-	github.com/lib/pq v1.10.9
-	google.golang.org/genproto/googleapis/api v0.0.0-20250127172529-29210b9bc287
-	google.golang.org/grpc v1.70.0
-	google.golang.org/protobuf v1.36.4
-)
-
-require (
-	golang.org/x/net v0.33.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/net v0.34.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250124145028-65684f501c47 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
+	google.golang.org/protobuf v1.36.4 // indirect
 )
