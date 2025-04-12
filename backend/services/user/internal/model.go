@@ -15,7 +15,7 @@ type AuthClient interface {
 
 type Persistence interface {
 	SaveUser(ctx context.Context) error
-	GetUser(ctx context.Context, userID string) (User, error)
+	GetUserByID(ctx context.Context, userID string) (User, error)
 	UpdateUser(ctx context.Context, userID string) error
 	DeleteUser(ctx context.Context, userID string) error
 }

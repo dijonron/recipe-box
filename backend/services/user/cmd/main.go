@@ -9,8 +9,11 @@ import (
 	"syscall"
 
 	"github.com/dijonron/recipe-box/pkg/config"
+	"github.com/dijonron/recipe-box/pkg/database"
 	"github.com/dijonron/recipe-box/pkg/logger"
 
+	"github.com/dijonron/recipe-box/services/user/internal"
+	p "github.com/dijonron/recipe-box/services/user/internal/persistence"
 	"github.com/dijonron/recipe-box/services/user/internal/service"
 )
 
@@ -35,16 +38,15 @@ func main() {
 }
 
 func buildServer(ctx context.Context, cfg config.Config) service.Server {
-	// _, err := database.ConnectToDB(ctx, cfg.DatabaseConfig)
-	// if err != nil {
-	// 	os.Exit(1)
-	// }
-	// slog.Info("connected to db")
+	db, err := database.ConnectToDB(ctx, cfg.DatabaseConfig)
+	if err != nil {
+		os.Exit(1)
+	}
 
-	// userPersistence := up.NewUserPersistence(db)
-	// user := user.NewUserService(userPersistence)
+	persistence := p.NewPersistence(db)
+	user := user.NewUserManager(persistence)
 
-	server := service.NewUserServer(cfg.ServerConfig)
+	server := service.NewUserServer(cfg.ServerConfig, user)
 
 	return server
 }

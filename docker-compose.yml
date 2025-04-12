@@ -7,3 +7,27 @@ services:
       - "50051:50051"
     env_file:
       - backend/services/user/.env
+    depends_on:
+      - user_db
+    networks:
+      - backend-network
+
+  user_db:
+    image: postgres:13
+    restart: always
+    env_file:
+      - backend/services/user/.env
+    ports:
+      - "5432:5432"
+    networks:
+      - backend-network
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+
+volumes:
+  user-db-data:
+    driver: local
+
+networks:
+  backend-network:
+    driver: bridge

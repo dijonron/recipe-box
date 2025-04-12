@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/dijonron/recipe-box/pkg/grpc"
 	pb "github.com/dijonron/recipe-box/proto/grpc/user"
+	"github.com/dijonron/recipe-box/services/user/internal"
 
 	g "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -17,7 +19,11 @@ type userServer struct {
 
 var _ pb.UserServer = (*userServer)(nil)
 
-func NewUserServer(cfg grpc.ServerConfig) Server {
+func NewUserServer(cfg grpc.ServerConfig, u user.UserManager) Server {
+	if u == nil {
+		slog.Error("user manager is nil")
+		return nil
+	}
 
 	var registers []grpc.Register
 	h := &userServer{}
