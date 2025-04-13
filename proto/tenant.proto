@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package tenant;
+
+option go_package = "github.com/dijonron/recipe-box/proto/tenant";
+
+
+service Tenant{
+  // Creates a new tenant.
+  rpc CreateTenant (CreateTenantRequest) returns (CreateTenantResponse);
+  // Retrieves a tenant by its ID.
+  rpc GetTenant (GetTenantRequest) returns (GetTenantResponse);
+  // Updates an existing tenant.
+  rpc UpdateTenant (UpdateTenantRequest) returns (UpdateTenantResponse);
+}
+
+message CreateTenantRequest {
+  string name = 1;
+}
+
+message CreateTenantResponse {
+  string slug = 1;
+  string name = 2;
+}
+
+message GetTenantRequest {
+  string slug = 1;
+}
+
+message GetTenantResponse {
+  TenantDetails tenant = 1;
+}
+
+message UpdateTenantRequest {
+  string slug = 1;
+  string name = 2;
+}
+
+message UpdateTenantResponse {
+}
+
+message TenantDetails {
+  string slug = 1;
+  string name = 2;
+}

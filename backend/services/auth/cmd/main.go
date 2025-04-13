@@ -15,11 +15,6 @@ import (
 	userclient "github.com/dijonron/recipe-box/services/auth/internal/userclient"
 )
 
-type AuthConfig struct {
-	JWTSecret     string `env:"JWT_SECRET"`
-	JWTExpiration int    `env:"JWT_EXPIRATION"`
-}
-
 func main() {
 	cfg := config.GetConfig()
 	logger := logger.NewLogger(cfg.LoggerConfig)

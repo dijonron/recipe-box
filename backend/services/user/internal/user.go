@@ -9,36 +9,40 @@ import (
 
 type userManager struct {
 	persistence Persistence
+	authclient  AuthClient
 }
 
 var _ UserManager = (*userManager)(nil)
 
-func NewUserManager(p Persistence) UserManager {
+func NewUserManager(p Persistence, ac AuthClient) UserManager {
 	return &userManager{
 		persistence: p,
+		authclient:  ac,
 	}
 }
 
-func (u *userManager) CreateUser(ctx context.Context, name, email, password string) error {
+func (u *userManager) CreateUser(ctx context.Context, name, email, password string) (string, error) {
 	hashedPassword, err := hashPassword(password)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = u.persistence.SaveUser(ctx, name, email, hashedPassword)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	// log user in
+	token, err := u.authclient.AuthenticateUser(ctx, email, password)
+	if err != nil {
+		return "", err
+	}
 
-	// return jwt
+	u.persistence.UpdateUserLogin(ctx, email)
 
-	return nil
+	return token, nil
 }
 
 func (u *userManager) GetUserByEmail(ctx context.Context, email string) (User, error) {
-
 	user, err := u.persistence.GetUserByEmail(ctx, email)
 	if err != nil {
 		return User{}, err

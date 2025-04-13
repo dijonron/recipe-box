@@ -171,6 +171,7 @@ func (x *CreateUserRequest) GetPassword() string {
 
 type CreateUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -203,6 +204,13 @@ func (x *CreateUserResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateUserResponse.ProtoReflect.Descriptor instead.
 func (*CreateUserResponse) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CreateUserResponse) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
 }
 
 type UserDetails struct {
@@ -358,8 +366,9 @@ const file_user_proto_rawDesc = "" +
 	"\x11CreateUserRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x03 \x01(\tR\bpassword\"\x14\n" +
-	"\x12CreateUserResponse\"[\n" +
+	"\bpassword\x18\x03 \x01(\tR\bpassword\"*\n" +
+	"\x12CreateUserResponse\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"[\n" +
 	"\vUserDetails\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\"\n" +

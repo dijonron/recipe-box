@@ -28,7 +28,7 @@ message CreateUserRequest {
 }
 
 message CreateUserResponse {
-  // This is an empty message.
+  string token = 1;
 }
 
 message UserDetails {

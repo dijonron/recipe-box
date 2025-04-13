@@ -25,6 +25,19 @@ services:
     networks:
       - backend-network
 
+  tenant_server:
+    build:
+      context: ./backend
+      dockerfile: services/tenant/Dockerfile
+    ports:
+      - "50053:50053"
+    env_file:
+      - backend/services/tenant/.env
+    depends_on:
+      - tenant_db
+    networks:
+      - backend-network
+
   user_db:
     image: postgres:13
     restart: always
@@ -37,8 +50,22 @@ services:
     volumes:
       - user-db-data:/var/lib/postgresql/data
 
+  tenant_db:
+    image: postgres:13
+    restart: always
+    env_file:
+      - backend/services/tenant/.env
+    ports:
+      - "5433:5432"
+    networks:
+      - backend-network
+    volumes:
+      - tenant-db-data:/var/lib/postgresql/data
+
 volumes:
   user-db-data:
+    driver: local
+  tenant-db-data:
     driver: local
 
 networks:

@@ -5,23 +5,15 @@ import (
 	"log/slog"
 
 	"github.com/Netflix/go-env"
-	"github.com/dijonron/recipe-box/pkg/database"
 	"github.com/dijonron/recipe-box/pkg/grpc"
 	"github.com/dijonron/recipe-box/pkg/logger"
 )
 
-type AuthClientConfig struct {
-	Host string `env:"AUTH_SERVICE_HOST,default=localhost"`
-	Port string `env:"AUTH_SERVICE_PORT,default=50051"`
-}
-
 type Config struct {
-	Env              string `env:"ENV,default=local"`
-	ServiceName      string `env:"SERVICE_NAME,default=user"`
-	ServerConfig     grpc.ServerConfig
-	DatabaseConfig   database.DatabaseConfig
-	LoggerConfig     logger.LoggerConfig
-	AuthClientConfig AuthClientConfig
+	Env          string `env:"ENV,default=local"`
+	ServiceName  string `env:"SERVICE_NAME,default=tenant"`
+	ServerConfig grpc.ServerConfig
+	LoggerConfig logger.LoggerConfig
 }
 
 func GetConfig() Config {
@@ -40,8 +32,6 @@ func (c Config) LogValue() slog.Value {
 		slog.String("env", c.Env),
 		slog.String("service", c.ServiceName),
 		slog.Any("server", c.ServerConfig),
-		slog.Any("database", c.DatabaseConfig.LogValue()),
 		slog.Any("logger", c.LoggerConfig),
-		slog.Any("auth_client", c.AuthClientConfig),
 	)
 }

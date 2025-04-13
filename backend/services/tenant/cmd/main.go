@@ -8,13 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/dijonron/recipe-box/pkg/database"
 	"github.com/dijonron/recipe-box/pkg/logger"
-	"github.com/dijonron/recipe-box/services/user/cmd/config"
-	user "github.com/dijonron/recipe-box/services/user/internal"
-	authclient "github.com/dijonron/recipe-box/services/user/internal/authclient"
-	p "github.com/dijonron/recipe-box/services/user/internal/persistence"
-	"github.com/dijonron/recipe-box/services/user/internal/service"
+	"github.com/dijonron/recipe-box/services/tenant/cmd/config"
+	tenant "github.com/dijonron/recipe-box/services/tenant/internal"
+	"github.com/dijonron/recipe-box/services/tenant/internal/service"
 )
 
 func main() {
@@ -38,17 +35,9 @@ func main() {
 }
 
 func buildServer(ctx context.Context, cfg config.Config) service.Server {
-	db, err := database.ConnectToDB(ctx, cfg.DatabaseConfig)
-	if err != nil {
-		os.Exit(1)
-	}
+	tenant := tenant.NewTenantManager()
 
-	persistence := p.NewPersistence(db)
-	authClient := authclient.NewAuthClient(cfg.AuthClientConfig)
-	user := user.NewUserManager(persistence, authClient)
-
-	server := service.NewUserServer(cfg.ServerConfig, user)
-
+	server := service.NewTenantServer(cfg.ServerConfig, tenant)
 	return server
 }
 

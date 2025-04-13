@@ -13,8 +13,9 @@ down:
 PHONY: proto
 proto:
 	@echo 'Generating protobuf...'
-	protoc --proto_path=./backend/proto --go_out=./backend/proto/grpc/user --go_opt=paths=source_relative --go-grpc_out=./backend/proto/grpc/user --go-grpc_opt=paths=source_relative ./backend/proto/user.proto
-	protoc --proto_path=./backend/proto --go_out=./backend/proto/grpc/auth --go_opt=paths=source_relative --go-grpc_out=./backend/proto/grpc/auth --go-grpc_opt=paths=source_relative ./backend/proto/auth.proto
+	protoc --proto_path=./proto --go_out=./backend/proto/grpc/user --go_opt=paths=source_relative --go-grpc_out=./backend/proto/grpc/user --go-grpc_opt=paths=source_relative ./proto/user.proto
+	protoc --proto_path=./proto --go_out=./backend/proto/grpc/auth --go_opt=paths=source_relative --go-grpc_out=./backend/proto/grpc/auth --go-grpc_opt=paths=source_relative ./proto/auth.proto
+	protoc --proto_path=./proto --go_out=./backend/proto/grpc/tenant --go_opt=paths=source_relative --go-grpc_out=./backend/proto/grpc/tenant --go-grpc_opt=paths=source_relative ./proto/tenant.proto
 	@echo 'Done!'
 
 .PHONY: migrate-create

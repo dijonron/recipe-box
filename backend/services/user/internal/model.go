@@ -5,7 +5,7 @@ import (
 )
 
 type UserManager interface {
-	CreateUser(ctx context.Context, name, email, password string) error
+	CreateUser(ctx context.Context, name, email, password string) (string, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	UpdateUserLogin(ctx context.Context, email string) error
 }

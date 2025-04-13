@@ -72,12 +72,15 @@ func (s *userServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) 
 		return nil, err
 	}
 
-	err = s.user.CreateUser(ctx, name, email, password)
+	token, err := s.user.CreateUser(ctx, name, email, password)
 	if err != nil {
+		// TODO: already exists error
 		return nil, errFailedToCreateUser
 	}
 
-	resp := &pb.CreateUserResponse{}
+	resp := &pb.CreateUserResponse{
+		Token: token,
+	}
 	return resp, nil
 }
 
