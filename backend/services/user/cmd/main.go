@@ -8,11 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/dijonron/recipe-box/pkg/config"
 	"github.com/dijonron/recipe-box/pkg/database"
 	"github.com/dijonron/recipe-box/pkg/logger"
-
-	"github.com/dijonron/recipe-box/services/user/internal"
+	"github.com/dijonron/recipe-box/services/user/cmd/config"
+	user "github.com/dijonron/recipe-box/services/user/internal"
 	p "github.com/dijonron/recipe-box/services/user/internal/persistence"
 	"github.com/dijonron/recipe-box/services/user/internal/service"
 )

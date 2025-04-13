@@ -1,0 +1,26 @@
+package auth
+
+import (
+	"context"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+type AuthManager interface {
+	LoginUser(ctx context.Context, email, password string) (string, error)
+}
+
+type UserClient interface {
+	GetUserByEmail(ctx context.Context, email string) (AuthDetials, error)
+	UpdateUserLogin(ctx context.Context, email string) error
+}
+
+type Claims struct {
+	email string
+	jwt.RegisteredClaims
+}
+
+type AuthDetials struct {
+	Email        string
+	PasswordHash string
+}

@@ -1,7 +1,10 @@
 package persistence
 
+import (
+	user "github.com/dijonron/recipe-box/services/user/internal"
+)
+
 type User struct {
-	ID         string `db:"id"`
 	Name       string `db:"name"`
 	Email      string `db:"email"`
 	Password   string `db:"password"`
@@ -9,4 +12,12 @@ type User struct {
 	UpdatedAt  string `db:"updated_at"`
 	DeletedAt  string `db:"deleted_at"`
 	LastLogin  string `db:"last_login"`
+}
+
+func toUser(u User) user.User {
+	return user.User{
+		Name:         u.Name,
+		Email:        u.Email,
+		PasswordHash: u.Password,
+	}
 }

@@ -1,5 +1,5 @@
 services:
-  user:
+  user_server:
     build:
       context: ./backend
       dockerfile: services/user/Dockerfile
@@ -7,6 +7,19 @@ services:
       - "50051:50051"
     env_file:
       - backend/services/user/.env
+    depends_on:
+      - user_db
+    networks:
+      - backend-network
+
+  auth_server:
+    build:
+      context: ./backend
+      dockerfile: services/auth/Dockerfile
+    ports:
+      - "50052:50052"
+    env_file:
+      - backend/services/auth/.env
     depends_on:
       - user_db
     networks:

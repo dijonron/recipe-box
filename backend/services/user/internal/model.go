@@ -5,23 +5,24 @@ import (
 )
 
 type UserManager interface {
-	CreateUser(ctx context.Context, name, email, password string) (string, error)
-	GetUserDetails(ctx context.Context, userID string) (User, error)
+	CreateUser(ctx context.Context, name, email, password string) error
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	UpdateUserLogin(ctx context.Context, email string) error
 }
 
 type AuthClient interface {
-	AuthenticateUser(ctx context.Context, email, password string) (bool, error)
+	AuthenticateUser(ctx context.Context, email, password string) (string, error)
 }
 
 type Persistence interface {
-	SaveUser(ctx context.Context) error
-	GetUserByID(ctx context.Context, userID string) (User, error)
-	UpdateUser(ctx context.Context, userID string) error
+	SaveUser(ctx context.Context, name, email, password string) error
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	UpdateUserLogin(ctx context.Context, email string) error
 	DeleteUser(ctx context.Context, userID string) error
 }
 
 type User struct {
-	ID    string
-	Name  string
-	Email string
+	Name         string
+	Email        string
+	PasswordHash string
 }

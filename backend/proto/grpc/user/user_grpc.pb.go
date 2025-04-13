@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.3
-// source: proto/user.proto
+// source: user.proto
 
 package user
 
@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	User_CreateUser_FullMethodName = "/user.User/CreateUser"
-	User_GetUser_FullMethodName    = "/user.User/GetUser"
+	User_CreateUser_FullMethodName          = "/user.User/CreateUser"
+	User_GetUserByEmail_FullMethodName      = "/user.User/GetUserByEmail"
+	User_UpdateUserLastLogin_FullMethodName = "/user.User/UpdateUserLastLogin"
 )
 
 // UserClient is the client API for User service.
@@ -29,8 +30,10 @@ const (
 type UserClient interface {
 	// Create a new user.
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
-	// Get user details by user ID.
-	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	// Get user details by email.
+	GetUserByEmail(ctx context.Context, in *GetUserByEmailRequest, opts ...grpc.CallOption) (*GetUserByEmailResponse, error)
+	// Update the last login time of a user.
+	UpdateUserLastLogin(ctx context.Context, in *UpdateUserLastLoginRequest, opts ...grpc.CallOption) (*UpdateUserLastLoginResponse, error)
 }
 
 type userClient struct {
@@ -51,10 +54,20 @@ func (c *userClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts
 	return out, nil
 }
 
-func (c *userClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+func (c *userClient) GetUserByEmail(ctx context.Context, in *GetUserByEmailRequest, opts ...grpc.CallOption) (*GetUserByEmailResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserResponse)
-	err := c.cc.Invoke(ctx, User_GetUser_FullMethodName, in, out, cOpts...)
+	out := new(GetUserByEmailResponse)
+	err := c.cc.Invoke(ctx, User_GetUserByEmail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) UpdateUserLastLogin(ctx context.Context, in *UpdateUserLastLoginRequest, opts ...grpc.CallOption) (*UpdateUserLastLoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUserLastLoginResponse)
+	err := c.cc.Invoke(ctx, User_UpdateUserLastLogin_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +80,10 @@ func (c *userClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...gr
 type UserServer interface {
 	// Create a new user.
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
-	// Get user details by user ID.
-	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
+	// Get user details by email.
+	GetUserByEmail(context.Context, *GetUserByEmailRequest) (*GetUserByEmailResponse, error)
+	// Update the last login time of a user.
+	UpdateUserLastLogin(context.Context, *UpdateUserLastLoginRequest) (*UpdateUserLastLoginResponse, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -82,8 +97,11 @@ type UnimplementedUserServer struct{}
 func (UnimplementedUserServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
-func (UnimplementedUserServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+func (UnimplementedUserServer) GetUserByEmail(context.Context, *GetUserByEmailRequest) (*GetUserByEmailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserByEmail not implemented")
+}
+func (UnimplementedUserServer) UpdateUserLastLogin(context.Context, *UpdateUserLastLoginRequest) (*UpdateUserLastLoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserLastLogin not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 func (UnimplementedUserServer) testEmbeddedByValue()              {}
@@ -124,20 +142,38 @@ func _User_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _User_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserRequest)
+func _User_GetUserByEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserByEmailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServer).GetUser(ctx, in)
+		return srv.(UserServer).GetUserByEmail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: User_GetUser_FullMethodName,
+		FullMethod: User_GetUserByEmail_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).GetUser(ctx, req.(*GetUserRequest))
+		return srv.(UserServer).GetUserByEmail(ctx, req.(*GetUserByEmailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_UpdateUserLastLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserLastLoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).UpdateUserLastLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_UpdateUserLastLogin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).UpdateUserLastLogin(ctx, req.(*UpdateUserLastLoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -154,10 +190,14 @@ var User_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _User_CreateUser_Handler,
 		},
 		{
-			MethodName: "GetUser",
-			Handler:    _User_GetUser_Handler,
+			MethodName: "GetUserByEmail",
+			Handler:    _User_GetUserByEmail_Handler,
+		},
+		{
+			MethodName: "UpdateUserLastLogin",
+			Handler:    _User_UpdateUserLastLogin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/user.proto",
+	Metadata: "user.proto",
 }

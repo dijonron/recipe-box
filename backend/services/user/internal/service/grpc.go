@@ -3,17 +3,39 @@ package service
 import (
 	"context"
 	"log/slog"
+	"regexp"
 
 	"github.com/dijonron/recipe-box/pkg/grpc"
 	pb "github.com/dijonron/recipe-box/proto/grpc/user"
-	"github.com/dijonron/recipe-box/services/user/internal"
+	user "github.com/dijonron/recipe-box/services/user/internal"
 
 	g "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 )
 
+const (
+	EMTPY_REQUEST         string = "request is nil"
+	FAILED_TO_CREATE_USER string = "failed to create user"
+	INVALID_EMAIL         string = "invlaid email address"
+	INVALID_PASSWORD      string = "invlaid password"
+	MISSING_EMAIL         string = "email is required"
+	MISSING_NAME          string = "name is required"
+	MISSING_PASSWORD      string = "password is required"
+)
+
+var (
+	errEmptyRequest       = status.Errorf(codes.InvalidArgument, EMTPY_REQUEST)
+	errFailedToCreateUser = status.Errorf(codes.Internal, FAILED_TO_CREATE_USER)
+	errInvalidEmail       = status.Errorf(codes.InvalidArgument, INVALID_EMAIL)
+	errInvalidPassword    = status.Errorf(codes.InvalidArgument, INVALID_PASSWORD)
+	errMissingEmail       = status.Errorf(codes.InvalidArgument, MISSING_EMAIL)
+	errMissingName        = status.Errorf(codes.InvalidArgument, MISSING_NAME)
+	errMissingPassword    = status.Errorf(codes.InvalidArgument, MISSING_PASSWORD)
+)
+
 type userServer struct {
+	user user.UserManager
 	pb.UnimplementedUserServer
 }
 
@@ -26,7 +48,9 @@ func NewUserServer(cfg grpc.ServerConfig, u user.UserManager) Server {
 	}
 
 	var registers []grpc.Register
-	h := &userServer{}
+	h := &userServer{
+		user: u,
+	}
 	registers = append(registers, h)
 
 	s := grpc.NewServer(cfg, registers)
@@ -37,14 +61,119 @@ func NewUserServer(cfg grpc.ServerConfig, u user.UserManager) Server {
 
 }
 
-func (us *userServer) Register(grpcServer *g.Server) {
-	pb.RegisterUserServer(grpcServer, us)
+func (s *userServer) Register(grpcServer *g.Server) {
+	pb.RegisterUserServer(grpcServer, s)
 }
 
-func (us userServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+func (s *userServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+	name, email, password, err := validateCreateUserRequest(req)
+	if err != nil {
+		slog.Info("create user request failed", "error", err)
+		return nil, err
+	}
+
+	err = s.user.CreateUser(ctx, name, email, password)
+	if err != nil {
+		return nil, errFailedToCreateUser
+	}
+
+	resp := &pb.CreateUserResponse{}
+	return resp, nil
 }
 
-func (us userServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+func (s *userServer) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailRequest) (*pb.GetUserByEmailResponse, error) {
+	email := req.GetEmail()
+	if email == "" {
+		return nil, errMissingEmail
+	}
+
+	user, err := s.user.GetUserByEmail(ctx, email)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "user not found: %v", err)
+	}
+
+	resp := &pb.GetUserByEmailResponse{
+		User: &pb.UserDetails{
+			Name:         user.Name,
+			Email:        user.Email,
+			PasswordHash: user.PasswordHash,
+		},
+	}
+	return resp, nil
+
+}
+
+func (s *userServer) UpdateUserLastLogin(ctx context.Context, req *pb.UpdateUserLastLoginRequest) (*pb.UpdateUserLastLoginResponse, error) {
+	email := req.GetEmail()
+	if email == "" {
+		return nil, errMissingEmail
+	}
+
+	err := s.user.UpdateUserLogin(ctx, email)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update user login: %v", err)
+	}
+
+	resp := &pb.UpdateUserLastLoginResponse{}
+	return resp, nil
+}
+
+// validateCreateUserRequest validates the input for creating a new user.
+func validateCreateUserRequest(req *pb.CreateUserRequest) (name, email, password string, error error) {
+	if req == nil {
+		return "", "", "", errEmptyRequest
+	}
+
+	name = req.GetName()
+	if name == "" {
+		return "", "", "", errMissingName
+	}
+
+	email = req.GetEmail()
+	if email == "" {
+		return "", "", "", errMissingEmail
+	}
+	if !isValidEmail(email) {
+		return "", "", "", errInvalidEmail
+	}
+
+	password = req.GetPassword()
+	if password == "" {
+		return "", "", "", errMissingPassword
+	}
+	if !isValidPassword(password) {
+		return "", "", "", errInvalidPassword
+	}
+
+	return name, email, password, nil
+}
+
+// isValidEmail validates whether the given email string is in a proper email format.
+func isValidEmail(email string) bool {
+	re := regexp.MustCompile(`^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$`)
+	return re.MatchString(email)
+}
+
+// isValidPassword validates a password based on the following criteria:
+func isValidPassword(password string) bool {
+	// Password should be at least 8 characters long
+	if len(password) < 8 {
+		return false
+	}
+
+	// Must contain at least one digit
+	hasDigit := regexp.MustCompile(`[0-9]`).MatchString(password)
+	if !hasDigit {
+		return false
+	}
+
+	// Must contain at least one uppercase letter
+	hasUppercase := regexp.MustCompile(`[A-Z]`).MatchString(password)
+	if !hasUppercase {
+		return false
+	}
+
+	// Must contain at least one special character (e.g., !@#$%^&*)
+	hasSpecialChar := regexp.MustCompile(`[!@#\$%\^&\*\(\)_\+\-=\[\]\{\};:'",<>\./?\\|]`).MatchString(password)
+	return hasSpecialChar
 }
