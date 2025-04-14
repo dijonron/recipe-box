@@ -36,7 +36,6 @@ func NewAuthClient(cfg config.AuthClientConfig) m.AuthClient {
 }
 
 func (c *authClient) AuthenticateUser(ctx context.Context, email, password string) (string, error) {
-
 	req := &pb.LoginRequest{
 		Email:    email,
 		Password: password,

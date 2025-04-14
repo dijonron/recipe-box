@@ -39,20 +39,20 @@ func NewAuthManager(cfg config.AuthConfig, uc UserClient) AuthManager {
 
 func (a *authManager) LoginUser(ctx context.Context, email, password string) (string, error) {
 	// Get user
-	user, err := a.userClient.GetUserByEmail(ctx, email)
+	authDetials, err := a.userClient.GetUserByEmail(ctx, email)
 	if err != nil {
 		return "", err
 	}
 
 	// Verify password
-	slog.Debug("p", "password", user.PasswordHash)
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+	slog.Debug("p", "password", authDetials.PasswordHash)
+	if err := bcrypt.CompareHashAndPassword([]byte(authDetials.PasswordHash), []byte(password)); err != nil {
 		slog.Info(INVALID_CREDENTIALS, "error", err)
 		return "", errInvalidCredentials
 	}
 
 	// Generate JWT token
-	token, err := a.generateJWT(email)
+	token, err := a.generateJWT(email, authDetials.TenantID, authDetials.Role)
 	if err != nil {
 		slog.Error(FAILED_TO_GEN_JWT, "error", err)
 		return "", errFailedToGenJwt
@@ -67,13 +67,15 @@ func (a *authManager) LoginUser(ctx context.Context, email, password string) (st
 }
 
 // generateJWT generates a JWT token for the authenticated user
-func (a *authManager) generateJWT(email string) (string, error) {
+func (a *authManager) generateJWT(email, tenantID, role string) (string, error) {
 	// Set expiration time
 	expirationTime := time.Now().Add(time.Duration(a.jwtExpirationHours) * time.Hour)
 
 	// Create claims
 	claims := &Claims{
-		email: email,
+		email:    email,
+		tenantID: tenantID,
+		role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

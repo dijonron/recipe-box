@@ -67,7 +67,7 @@ func (x *CreateTenantRequest) GetName() string {
 
 type CreateTenantResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Slug          string                 `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -103,9 +103,9 @@ func (*CreateTenantResponse) Descriptor() ([]byte, []int) {
 	return file_tenant_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreateTenantResponse) GetSlug() string {
+func (x *CreateTenantResponse) GetTenantId() string {
 	if x != nil {
-		return x.Slug
+		return x.TenantId
 	}
 	return ""
 }
@@ -119,7 +119,7 @@ func (x *CreateTenantResponse) GetName() string {
 
 type GetTenantRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Slug          string                 `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -154,9 +154,9 @@ func (*GetTenantRequest) Descriptor() ([]byte, []int) {
 	return file_tenant_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetTenantRequest) GetSlug() string {
+func (x *GetTenantRequest) GetTenantId() string {
 	if x != nil {
-		return x.Slug
+		return x.TenantId
 	}
 	return ""
 }
@@ -207,7 +207,7 @@ func (x *GetTenantResponse) GetTenant() *TenantDetails {
 
 type UpdateTenantRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Slug          string                 `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -243,9 +243,9 @@ func (*UpdateTenantRequest) Descriptor() ([]byte, []int) {
 	return file_tenant_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UpdateTenantRequest) GetSlug() string {
+func (x *UpdateTenantRequest) GetTenantId() string {
 	if x != nil {
-		return x.Slug
+		return x.TenantId
 	}
 	return ""
 }
@@ -295,7 +295,7 @@ func (*UpdateTenantResponse) Descriptor() ([]byte, []int) {
 
 type TenantDetails struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Slug          string                 `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -331,9 +331,9 @@ func (*TenantDetails) Descriptor() ([]byte, []int) {
 	return file_tenant_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *TenantDetails) GetSlug() string {
+func (x *TenantDetails) GetTenantId() string {
 	if x != nil {
-		return x.Slug
+		return x.TenantId
 	}
 	return ""
 }
@@ -351,20 +351,20 @@ const file_tenant_proto_rawDesc = "" +
 	"\n" +
 	"\ftenant.proto\x12\x06tenant\")\n" +
 	"\x13CreateTenantRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\">\n" +
-	"\x14CreateTenantResponse\x12\x12\n" +
-	"\x04slug\x18\x01 \x01(\tR\x04slug\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"&\n" +
-	"\x10GetTenantRequest\x12\x12\n" +
-	"\x04slug\x18\x01 \x01(\tR\x04slug\"B\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"G\n" +
+	"\x14CreateTenantResponse\x12\x1b\n" +
+	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"/\n" +
+	"\x10GetTenantRequest\x12\x1b\n" +
+	"\ttenant_id\x18\x01 \x01(\tR\btenantId\"B\n" +
 	"\x11GetTenantResponse\x12-\n" +
-	"\x06tenant\x18\x01 \x01(\v2\x15.tenant.TenantDetailsR\x06tenant\"=\n" +
-	"\x13UpdateTenantRequest\x12\x12\n" +
-	"\x04slug\x18\x01 \x01(\tR\x04slug\x12\x12\n" +
+	"\x06tenant\x18\x01 \x01(\v2\x15.tenant.TenantDetailsR\x06tenant\"F\n" +
+	"\x13UpdateTenantRequest\x12\x1b\n" +
+	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\"\x16\n" +
-	"\x14UpdateTenantResponse\"7\n" +
-	"\rTenantDetails\x12\x12\n" +
-	"\x04slug\x18\x01 \x01(\tR\x04slug\x12\x12\n" +
+	"\x14UpdateTenantResponse\"@\n" +
+	"\rTenantDetails\x12\x1b\n" +
+	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name2\xe0\x01\n" +
 	"\x06Tenant\x12I\n" +
 	"\fCreateTenant\x12\x1b.tenant.CreateTenantRequest\x1a\x1c.tenant.CreateTenantResponse\x12@\n" +

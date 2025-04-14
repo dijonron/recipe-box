@@ -16,11 +16,15 @@ type UserClient interface {
 }
 
 type Claims struct {
-	email string
+	email    string
+	tenantID string
+	role     string
 	jwt.RegisteredClaims
 }
 
 type AuthDetials struct {
 	Email        string
 	PasswordHash string
+	Role         string
+	TenantID     string
 }
