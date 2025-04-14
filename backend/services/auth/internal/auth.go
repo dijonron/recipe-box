@@ -49,7 +49,6 @@ func (a *authManager) LoginUser(ctx context.Context, email, password string) (st
 	}
 
 	// Verify password
-	slog.Debug("p", "password", authDetials.PasswordHash)
 	if err := bcrypt.CompareHashAndPassword([]byte(authDetials.PasswordHash), []byte(password)); err != nil {
 		slog.Info(INVALID_CREDENTIALS, "error", err)
 		return "", errInvalidCredentials
@@ -86,9 +85,9 @@ func (a *authManager) generateJWT(email, tenantID, role string) (string, error) 
 
 	// Create claims
 	claims := &Claims{
-		email:    email,
-		tenantID: tenantID,
-		role:     role,
+		Email:    email,
+		TenantID: tenantID,
+		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -127,7 +126,7 @@ func (a *authManager) validateToken(token string) (bool, error) {
 	}
 
 	if claims, ok := parsedToken.Claims.(*Claims); ok && parsedToken.Valid {
-		slog.Debug("token validated successfully", "email", claims.email, "tenantID", claims.tenantID, "role", claims.role)
+		slog.Debug("token validated successfully", "email", claims.Email, "tenantID", claims.TenantID, "role", claims.Role)
 		return true, nil
 	}
 

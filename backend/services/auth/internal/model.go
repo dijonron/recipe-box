@@ -17,9 +17,9 @@ type UserClient interface {
 }
 
 type Claims struct {
-	email    string
-	tenantID string
-	role     string
+	Email    string `json:"email"`
+	TenantID string `json:"tenant_id"`
+	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 

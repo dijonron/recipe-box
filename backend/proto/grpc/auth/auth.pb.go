@@ -186,9 +186,7 @@ func (x *ValidateRequest) GetToken() string {
 type ValidateResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required: A boolean indicating whether the token is valid. True if valid, false otherwise.
-	Valid bool `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
-	// Required: The user ID associated with the token.
-	UserId        string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Valid         bool `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -230,13 +228,6 @@ func (x *ValidateResponse) GetValid() bool {
 	return false
 }
 
-func (x *ValidateResponse) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
 var File_auth_proto protoreflect.FileDescriptor
 
 const file_auth_proto_rawDesc = "" +
@@ -251,10 +242,9 @@ const file_auth_proto_rawDesc = "" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12#\n" +
 	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"'\n" +
 	"\x0fValidateRequest\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\"A\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"(\n" +
 	"\x10ValidateResponse\x12\x14\n" +
-	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId2s\n" +
+	"\x05valid\x18\x01 \x01(\bR\x05valid2s\n" +
 	"\x04Auth\x120\n" +
 	"\x05Login\x12\x12.auth.LoginRequest\x1a\x13.auth.LoginResponse\x129\n" +
 	"\bValidate\x12\x15.auth.ValidateRequest\x1a\x16.auth.ValidateResponseB+Z)github.com/dijonron/recipe-box/proto/authb\x06proto3"

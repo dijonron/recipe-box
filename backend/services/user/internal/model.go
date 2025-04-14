@@ -25,4 +25,6 @@ type User struct {
 	Name         string
 	Email        string
 	PasswordHash string
+	TenantID     string
+	Role         string
 }

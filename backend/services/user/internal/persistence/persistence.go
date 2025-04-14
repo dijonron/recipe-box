@@ -44,7 +44,6 @@ func (p persistence) GetUserByEmail(ctx context.Context, email string) (user.Use
 		slog.Error(FAILED_TO_GET, "err", err)
 		return user.User{}, err
 	}
-
 	return toUser(u), nil
 }
 

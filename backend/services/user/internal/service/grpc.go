@@ -100,6 +100,8 @@ func (s *userServer) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailR
 			Name:         user.Name,
 			Email:        user.Email,
 			PasswordHash: user.PasswordHash,
+			TenantId:     user.TenantID,
+			Role:         user.Role,
 		},
 	}
 	return resp, nil

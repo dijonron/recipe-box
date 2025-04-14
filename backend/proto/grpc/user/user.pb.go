@@ -218,6 +218,8 @@ type UserDetails struct {
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
 	PasswordHash  string                 `protobuf:"bytes,4,opt,name=passwordHash,proto3" json:"passwordHash,omitempty"`
+	TenantId      string                 `protobuf:"bytes,5,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	Role          string                 `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -269,6 +271,20 @@ func (x *UserDetails) GetEmail() string {
 func (x *UserDetails) GetPasswordHash() string {
 	if x != nil {
 		return x.PasswordHash
+	}
+	return ""
+}
+
+func (x *UserDetails) GetTenantId() string {
+	if x != nil {
+		return x.TenantId
+	}
+	return ""
+}
+
+func (x *UserDetails) GetRole() string {
+	if x != nil {
+		return x.Role
 	}
 	return ""
 }
@@ -368,11 +384,13 @@ const file_user_proto_rawDesc = "" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x03 \x01(\tR\bpassword\"*\n" +
 	"\x12CreateUserResponse\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\"[\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"\x8c\x01\n" +
 	"\vUserDetails\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\"\n" +
-	"\fpasswordHash\x18\x04 \x01(\tR\fpasswordHash\"2\n" +
+	"\fpasswordHash\x18\x04 \x01(\tR\fpasswordHash\x12\x1b\n" +
+	"\ttenant_id\x18\x05 \x01(\tR\btenantId\x12\x12\n" +
+	"\x04role\x18\x06 \x01(\tR\x04role\"2\n" +
 	"\x1aUpdateUserLastLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"\x1d\n" +
 	"\x1bUpdateUserLastLoginResponse2\xf0\x01\n" +
