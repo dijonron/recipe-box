@@ -12,13 +12,17 @@ import (
 )
 
 const (
-	INVALID_CREDENTIALS string = "invalid credentials"
-	FAILED_TO_GEN_JWT   string = "failed to generate jwt"
+	INVALID_CREDENTIALS    string = "invalid credentials"
+	INVALID_SIGNING_METHOD string = "unexpected signing method"
+	FAILED_TO_GEN_JWT      string = "failed to generate jwt"
+	INVALID_JWT            string = "dailed to validate jwt"
 )
 
 var (
-	errInvalidCredentials = errors.New(INVALID_CREDENTIALS)
-	errFailedToGenJwt     = errors.New(FAILED_TO_GEN_JWT)
+	errInvalidCredentials   = errors.New(INVALID_CREDENTIALS)
+	errInvalidJWT           = errors.New(INVALID_JWT)
+	errInvalidSigningMethod = errors.New(INVALID_SIGNING_METHOD)
+	errFailedToGenJwt       = errors.New(FAILED_TO_GEN_JWT)
 )
 
 type authManager struct {
@@ -66,6 +70,15 @@ func (a *authManager) LoginUser(ctx context.Context, email, password string) (st
 	return token, nil
 }
 
+func (a *authManager) ValidateToken(ctx context.Context, token string) (bool, error) {
+	valid, err := a.validateToken(token)
+	if err != nil {
+		return false, err
+	}
+
+	return valid, nil
+}
+
 // generateJWT generates a JWT token for the authenticated user
 func (a *authManager) generateJWT(email, tenantID, role string) (string, error) {
 	// Set expiration time
@@ -97,4 +110,27 @@ func (a *authManager) generateJWT(email, tenantID, role string) (string, error) 
 	}
 
 	return tokenString, nil
+}
+
+// validateToken validates the JWT token and returns the claims if valid
+func (a *authManager) validateToken(token string) (bool, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			slog.Warn(INVALID_SIGNING_METHOD, "method", token.Header["alg"])
+			return nil, errInvalidSigningMethod
+		}
+		return []byte(a.jwtSecret), nil
+	})
+	if err != nil {
+		slog.Info(INVALID_JWT, "error", err)
+		return false, errInvalidJWT
+	}
+
+	if claims, ok := parsedToken.Claims.(*Claims); ok && parsedToken.Valid {
+		slog.Debug("token validated successfully", "email", claims.email, "tenantID", claims.tenantID, "role", claims.role)
+		return true, nil
+	}
+
+	slog.Info(INVALID_JWT)
+	return false, errInvalidJWT
 }

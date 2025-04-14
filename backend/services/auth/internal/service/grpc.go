@@ -17,6 +17,7 @@ const (
 	ERROR_OCCURED       string = "an unknown error occured"
 	EMTPY_REQUEST       string = "request is nil"
 	INVALID_CREDENTIALS string = "invalid credentials"
+	INVALID_TOKEN       string = "failed to validate token"
 	MISSING_EMAIL       string = "email is required"
 	MISSING_PASSWORD    string = "password is required"
 )
@@ -25,6 +26,7 @@ var (
 	errUnknownError       = status.Errorf(codes.Internal, ERROR_OCCURED)
 	errEmptyRequest       = status.Errorf(codes.InvalidArgument, EMTPY_REQUEST)
 	errInvalidCredentials = status.Error(codes.Unauthenticated, INVALID_CREDENTIALS)
+	errInvalidToken       = status.Error(codes.Unauthenticated, INVALID_TOKEN)
 	errMissingEmail       = status.Errorf(codes.InvalidArgument, MISSING_EMAIL)
 	errMissingPassword    = status.Errorf(codes.InvalidArgument, MISSING_PASSWORD)
 )
@@ -81,7 +83,19 @@ func (s *authServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Login
 }
 
 func (s *authServer) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Validate not implemented")
+	if req == nil || req.GetToken() == "" {
+		return &pb.ValidateResponse{}, status.Error(codes.InvalidArgument, "token is required")
+	}
+
+	isValid, err := s.auth.ValidateToken(ctx, req.GetToken())
+	if err != nil {
+		slog.Error(INVALID_TOKEN, "error", err)
+		return &pb.ValidateResponse{}, errInvalidToken
+	}
+
+	return &pb.ValidateResponse{
+		Valid: isValid,
+	}, nil
 }
 
 // validateLoginRequest validates the login request

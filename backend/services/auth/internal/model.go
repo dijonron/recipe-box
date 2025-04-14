@@ -8,6 +8,7 @@ import (
 
 type AuthManager interface {
 	LoginUser(ctx context.Context, email, password string) (string, error)
+	ValidateToken(ctx context.Context, token string) (bool, error)
 }
 
 type UserClient interface {
