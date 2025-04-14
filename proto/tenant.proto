@@ -19,12 +19,12 @@ message CreateTenantRequest {
 }
 
 message CreateTenantResponse {
-  string slug = 1;
+  string tenant_id = 1;
   string name = 2;
 }
 
 message GetTenantRequest {
-  string slug = 1;
+  string tenant_id = 1;
 }
 
 message GetTenantResponse {
@@ -32,7 +32,7 @@ message GetTenantResponse {
 }
 
 message UpdateTenantRequest {
-  string slug = 1;
+  string tenant_id = 1;
   string name = 2;
 }
 
@@ -40,6 +40,6 @@ message UpdateTenantResponse {
 }
 
 message TenantDetails {
-  string slug = 1;
+  string tenant_id = 1;
   string name = 2;
 }

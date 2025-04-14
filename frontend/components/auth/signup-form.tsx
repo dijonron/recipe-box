@@ -1,5 +1,6 @@
 "use client";
 
+import { useActionState, useEffect, startTransition } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -15,38 +16,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Link from "next/link";
+import { SignupInput, signupSchema } from "./types";
+import { toast } from "sonner";
+import { signup } from "@/actions/auth/signup";
 
-const formSchema = z
-  .object({
-    name: z
-      .string()
-      .min(2, "Name must be at least 2 characters")
-      .max(100, "Name cannot exceed 100 characters")
-      .trim(),
-    email: z.string().email({ message: "Invalid email address" }),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number")
-      .regex(
-        /[^A-Za-z0-9]/,
-        "Password must contain at least one special character"
-      ),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+export function SignupForm({ className }: React.ComponentProps<"form">) {
+  const [state, formAction, pending] = useActionState(signup, {
+    success: false,
+    errors: {},
   });
 
-export function SignupForm({
-  className,
-  ...props
-}: React.ComponentProps<"form">) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<SignupInput>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -55,12 +36,39 @@ export function SignupForm({
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  useEffect(() => {
+    const touchedOrSubmitted =
+      form.formState.isSubmitted ||
+      (form.getFieldState("email").isTouched &&
+        form.getFieldState("password").isTouched);
+
+    if (state?.errors) {
+      Object.entries(state.errors).forEach(([key, value]) => {
+        if (key !== "_form") {
+          form.setError(key as keyof SignupInput, {
+            type: "server",
+            message: value?.[0],
+          });
+        }
+      });
+    }
+    if (touchedOrSubmitted && !state?.success) {
+      toast.error("Sign up failed.", {
+        description: Object.values(state?.errors || {})
+          .flat()
+          .join(", "),
+      });
+    }
+  }, [state, form]);
+
+  function onSubmit(data: SignupInput) {
+    startTransition(() => {
+      formAction(data as any as FormData);
+    });
   }
 
   return (
-    <Form {...form} {...props}>
+    <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn("flex flex-col gap-6", className)}

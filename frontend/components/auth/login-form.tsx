@@ -1,6 +1,6 @@
 "use client";
 
-import { z } from "zod";
+import { useActionState, useEffect, startTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { cn } from "@/lib/utils";
@@ -15,32 +15,58 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
+import { LoginInput, loginSchema } from "./types";
+import { toast } from "sonner";
+import { login } from "@/actions/auth/login";
 
-const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters" }),
-});
+export function LoginForm({ className }: React.ComponentProps<"form">) {
+  const [state, formAction, pending] = useActionState(login, {
+    success: false,
+    errors: {},
+  });
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"form">) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
+  useEffect(() => {
+    const touchedOrSubmitted =
+      form.formState.isSubmitted ||
+      (form.getFieldState("email").isTouched &&
+        form.getFieldState("password").isTouched);
+
+    if (state?.errors) {
+      Object.entries(state.errors).forEach(([key, value]) => {
+        if (key !== "_form") {
+          form.setError(key as keyof LoginInput, {
+            type: "server",
+            message: value?.[0],
+          });
+        }
+      });
+    }
+    if (touchedOrSubmitted && !state?.success) {
+      toast.error("Login failed.", {
+        description: Object.values(state?.errors || {})
+          .flat()
+          .join(", "),
+      });
+    }
+  }, [state, form]);
+
+  const onSubmit = (data: LoginInput) => {
+    startTransition(() => {
+      formAction(data as any as FormData);
+    });
+  };
 
   return (
-    <Form {...form} {...props}>
+    <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn("flex flex-col gap-6", className)}
@@ -85,7 +111,8 @@ export function LoginForm({
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending && <Loader2 className="animate-spin" />}
           Login
         </Button>
         <div className="text-center text-sm">

@@ -36,6 +36,4 @@ message ValidateRequest {
 message ValidateResponse {
   // Required: A boolean indicating whether the token is valid. True if valid, false otherwise.
   bool valid = 1;
-  // Required: The user ID associated with the token.
-  string user_id = 2;
 }
