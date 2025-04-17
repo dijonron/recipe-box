@@ -1,17 +1,10 @@
-import { getCurrentUser } from "@/lib/auth";
 import { GalleryVerticalEnd } from "lucide-react";
-import { redirect } from "next/navigation";
 
 export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
-  if (user) {
-    redirect("/");
-  }
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body>

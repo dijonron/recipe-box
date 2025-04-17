@@ -1,12 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, startTransition } from "react";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { cn } from "@/lib/utils";
+import { signup } from "@/actions/auth/signup";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -15,10 +10,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { SignupInput, signupSchema } from "./types";
+import { startTransition, useActionState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { signup } from "@/actions/auth/signup";
+import { SignupInput, signupSchema } from "./types";
+import { Loader2 as Spinner } from "lucide-react";
 
 export function SignupForm({ className }: React.ComponentProps<"form">) {
   const [state, formAction, pending] = useActionState(signup, {
@@ -132,7 +132,8 @@ export function SignupForm({ className }: React.ComponentProps<"form">) {
           )}
         />
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending && <Spinner className="animate-spin" />}
           Sign up
         </Button>
         <div className="text-center text-sm">

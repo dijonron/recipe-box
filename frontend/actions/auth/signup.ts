@@ -1,10 +1,9 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { signupSchema } from "@/components/auth/types";
-import * as grpc from "@grpc/grpc-js";
 import { redirect } from "next/navigation";
 import { userClient } from "../../lib/grpc/userClient";
+import { createSession } from "@/lib/session";
 
 function signupRequest(
   name: string,
@@ -34,20 +33,20 @@ export async function signup(_: any, formData: FormData) {
 
   try {
     const { name, email, password } = data;
-    const res = await signupRequest(name, email, password);
-    (await cookies()).set("auth_token", res.token, {
-      httpOnly: true,
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24,
-    });
-  } catch (err: any) {
-    // TODO: already exists!
+    const resp = await signupRequest(name, email, password);
+    const user = resp.user;
+
+    if (!user) {
+      throw Error("could not sign user up");
+    }
+
+    await createSession(user.id, user.role);
+  } catch (err) {
     return {
       success: false,
-      errors: { _form: ["An error occured. Please try again."] },
+      message:
+        "An error occurred while creating your account. Please try again.",
     };
   }
-  redirect("/");
+  redirect("/onboarding");
 }

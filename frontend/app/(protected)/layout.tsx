@@ -1,5 +1,5 @@
 import { AuthProvider } from "@/context/AuthContext";
-import { getCurrentUser } from "@/lib/auth";
+// import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function ProtectedLayout({
@@ -7,14 +7,14 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect("/login");
-  }
+  // const user = await getCurrentUser();
+  // if (!user) {
+  //   redirect("/login");
+  // }
 
-  if (!user.tenant_id) {
-    redirect("/onboarding");
-  }
+  // if (!user.tenant_id) {
+  //   redirect("/onboarding");
+  // }
 
-  return <AuthProvider initialUser={user}>{children}</AuthProvider>;
+  return <AuthProvider initialUser={{}}>{children}</AuthProvider>;
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 export default function Home() {
-  const { user } = useAuth();
   const [orgName, setOrgName] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   // const router = useRouter();
@@ -67,6 +65,7 @@ export default function Home() {
               Request to Join
             </Button>
           </CardContent>
+          <Button>Logout</Button>
         </Card>
       </TabsContent>
     </Tabs>

@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/auth";
+// import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function OnboardingLayout({
@@ -6,10 +6,10 @@ export default async function OnboardingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect("/login");
-  }
+  // const user = await getCurrentUser();
+  // if (!user) {
+  //   redirect("/login");
+  // }
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">

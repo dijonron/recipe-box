@@ -1,17 +1,21 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { loginSchema } from "@/components/auth/types";
 import * as grpc from "@grpc/grpc-js";
 import { redirect } from "next/navigation";
-import { authClient } from "../../lib/grpc/authClient";
+import { userClient } from "../../lib/grpc/userClient";
+import { createSession } from "@/lib/session";
 
 function loginRequest(email: string, password: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    authClient.Login({ email, password }, (err: any, response: any) => {
+    userClient.Login({ email, password }, (err: any, response: any) => {
       if (err) reject(err);
       else resolve(response);
     });
+    // reject({ code: grpc.status.INTERNAL });
+    // resolve({
+    //   user: { id: "9152c9f4-9782-41c6-bd42-7bf7a58655c2", role: "user" },
+    // });
   });
 }
 
@@ -27,16 +31,17 @@ export async function login(_: any, formData: FormData) {
 
   try {
     const { email, password } = data;
-    const res = await loginRequest(email, password);
-    (await cookies()).set("auth_token", res.token, {
-      httpOnly: true,
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24,
-    });
+    const resp = await loginRequest(email, password);
+    const user = resp.user;
+    console.log(user);
+
+    if (!user) {
+      throw Error("could not log user in");
+    }
+
+    await createSession(user.id, user.role);
   } catch (err: any) {
-    if (err.code === grpc.status.UNAUTHENTICATED) {
+    if (err?.code === grpc.status.UNAUTHENTICATED) {
       return {
         success: false,
         errors: { _form: ["Invalid email or password."] },
@@ -47,5 +52,6 @@ export async function login(_: any, formData: FormData) {
       errors: { _form: ["An error occured. Please try again."] },
     };
   }
+
   redirect("/");
 }
