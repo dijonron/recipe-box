@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { logout } from "@/actions/auth/logout";
 
 export default function Home() {
   const [orgName, setOrgName] = useState("");
@@ -65,9 +66,9 @@ export default function Home() {
               Request to Join
             </Button>
           </CardContent>
-          <Button>Logout</Button>
         </Card>
       </TabsContent>
+      <Button onClick={() => logout()}>Logout</Button>
     </Tabs>
   );
 }
