@@ -7,6 +7,7 @@ import (
 )
 
 type User struct {
+	Id           string         `db:"id"`
 	Name         string         `db:"name"`
 	Email        string         `db:"email"`
 	PasswordHash string         `db:"password_hash"`
@@ -20,6 +21,7 @@ type User struct {
 
 func toUser(u User) user.User {
 	return user.User{
+		Id:           u.Id,
 		Name:         u.Name,
 		Email:        u.Email,
 		PasswordHash: u.PasswordHash,

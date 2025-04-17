@@ -7,6 +7,8 @@ option go_package = "github.com/dijonron/recipe-box/proto/user";
 service User {
   // Create a new user.
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+  // Log an exisiting user in. 
+  rpc Login (LoginRequest) returns (LoginResponse);
   // Get user details by email.
   rpc GetUserByEmail (GetUserByEmailRequest) returns (GetUserByEmailResponse);
   // Update the last login time of a user.
@@ -21,6 +23,16 @@ message GetUserByEmailResponse {
   UserDetails user = 1;
 }
 
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  UserDetails user = 1; 
+
+}
+
 message CreateUserRequest {
   string name = 1;
   string email = 2;
@@ -28,15 +40,7 @@ message CreateUserRequest {
 }
 
 message CreateUserResponse {
-  string token = 1;
-}
-
-message UserDetails {
-  string name = 2;
-  string email = 3;
-  string passwordHash = 4;
-  string tenant_id = 5;
-  string role = 6;
+  UserDetails user = 1; 
 }
 
 message UpdateUserLastLoginRequest {
@@ -45,4 +49,13 @@ message UpdateUserLastLoginRequest {
 
 message UpdateUserLastLoginResponse {
   // This is an empty message.
+}
+
+message UserDetails {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string passwordHash = 4;
+  string tenant_id = 5;
+  string role = 6;
 }

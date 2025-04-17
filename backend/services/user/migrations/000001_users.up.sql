@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
-  email TEXT PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT,
   name TEXT,
   password_hash TEXT NOT NULL,
   tenant_id TEXT,

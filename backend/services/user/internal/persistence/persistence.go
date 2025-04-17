@@ -25,20 +25,21 @@ func NewPersistence(db *sqlx.DB) persistence {
 	}
 }
 
-func (p persistence) SaveUser(ctx context.Context, name, email, password string) error {
-	query := `INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3)`
-	_, err := p.ExecContext(ctx, query, name, email, password)
+func (p persistence) SaveUser(ctx context.Context, name, email, password string) (string, error) {
+	var userID string
+	query := `INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id`
+	err := p.QueryRowContext(ctx, query, name, email, password).Scan(&userID)
 	if err != nil {
 		slog.Error(FAILED_TO_SAVE, "err", err)
-		return err
+		return "", err
 	}
 
-	return nil
+	return userID, nil
 }
 
 func (p persistence) GetUserByEmail(ctx context.Context, email string) (user.User, error) {
 	var u User
-	query := `SELECT name, email, password_hash, tenant_id, role FROM users WHERE email = $1`
+	query := `SELECT id, name, email, password_hash, tenant_id, role FROM users WHERE email = $1`
 	err := p.GetContext(ctx, &u, query, email)
 	if err != nil {
 		slog.Error(FAILED_TO_GET, "err", err)

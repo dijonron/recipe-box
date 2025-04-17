@@ -2,9 +2,18 @@ package user
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"golang.org/x/crypto/bcrypt"
+)
+
+var (
+	INVALID_CREDENTIALS string = "invalid credentials"
+)
+
+var (
+	errInvalidCredentials = errors.New(INVALID_CREDENTIALS)
 )
 
 type userManager struct {
@@ -21,25 +30,44 @@ func NewUserManager(p Persistence, ac AuthClient) UserManager {
 	}
 }
 
-func (u *userManager) CreateUser(ctx context.Context, name, email, password string) (string, error) {
+func (u *userManager) CreateUser(ctx context.Context, name, email, password string) (User, error) {
 	hashedPassword, err := hashPassword(password)
 	if err != nil {
-		return "", err
+		return User{}, err
 	}
 
-	err = u.persistence.SaveUser(ctx, name, email, hashedPassword)
+	userID, err := u.persistence.SaveUser(ctx, name, email, hashedPassword)
 	if err != nil {
-		return "", err
-	}
-
-	token, err := u.authclient.AuthenticateUser(ctx, email, password)
-	if err != nil {
-		return "", err
+		return User{}, err
 	}
 
 	u.persistence.UpdateUserLogin(ctx, email)
 
-	return token, nil
+	user := User{
+		Id:    userID,
+		Name:  name,
+		Email: email,
+		Role:  "user", // hardcode for now, since new users will always have the user role
+	}
+
+	return user, nil
+}
+
+func (u *userManager) Login(ctx context.Context, email, password string) (User, error) {
+	user, err := u.persistence.GetUserByEmail(ctx, email)
+	if err != nil {
+		return User{}, err
+	}
+
+	// Verify password
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+		slog.Info(INVALID_CREDENTIALS, "error", err)
+		return User{}, errInvalidCredentials
+	}
+
+	u.persistence.UpdateUserLogin(ctx, email)
+
+	return user, nil
 }
 
 func (u *userManager) GetUserByEmail(ctx context.Context, email string) (User, error) {

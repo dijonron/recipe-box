@@ -7,7 +7,7 @@ import (
 
 	"github.com/dijonron/recipe-box/pkg/grpc"
 	pb "github.com/dijonron/recipe-box/proto/grpc/user"
-	user "github.com/dijonron/recipe-box/services/user/internal"
+	u "github.com/dijonron/recipe-box/services/user/internal"
 
 	g "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -15,8 +15,10 @@ import (
 )
 
 const (
+	ERROR_OCCURED         string = "an unknown error occured"
 	EMTPY_REQUEST         string = "request is nil"
 	FAILED_TO_CREATE_USER string = "failed to create user"
+	INVALID_CREDENTIALS   string = "invalid credentials"
 	INVALID_EMAIL         string = "invlaid email address"
 	INVALID_PASSWORD      string = "invlaid password"
 	MISSING_EMAIL         string = "email is required"
@@ -27,21 +29,24 @@ const (
 var (
 	errEmptyRequest       = status.Errorf(codes.InvalidArgument, EMTPY_REQUEST)
 	errFailedToCreateUser = status.Errorf(codes.Internal, FAILED_TO_CREATE_USER)
-	errInvalidEmail       = status.Errorf(codes.InvalidArgument, INVALID_EMAIL)
-	errInvalidPassword    = status.Errorf(codes.InvalidArgument, INVALID_PASSWORD)
-	errMissingEmail       = status.Errorf(codes.InvalidArgument, MISSING_EMAIL)
-	errMissingName        = status.Errorf(codes.InvalidArgument, MISSING_NAME)
-	errMissingPassword    = status.Errorf(codes.InvalidArgument, MISSING_PASSWORD)
+	errInvalidCredentials = status.Error(codes.Unauthenticated, INVALID_CREDENTIALS)
+
+	errInvalidEmail    = status.Errorf(codes.InvalidArgument, INVALID_EMAIL)
+	errInvalidPassword = status.Errorf(codes.InvalidArgument, INVALID_PASSWORD)
+	errMissingEmail    = status.Errorf(codes.InvalidArgument, MISSING_EMAIL)
+	errMissingName     = status.Errorf(codes.InvalidArgument, MISSING_NAME)
+	errMissingPassword = status.Errorf(codes.InvalidArgument, MISSING_PASSWORD)
+	errUnknownError    = status.Errorf(codes.Internal, ERROR_OCCURED)
 )
 
 type userServer struct {
-	user user.UserManager
+	user u.UserManager
 	pb.UnimplementedUserServer
 }
 
 var _ pb.UserServer = (*userServer)(nil)
 
-func NewUserServer(cfg grpc.ServerConfig, u user.UserManager) Server {
+func NewUserServer(cfg grpc.ServerConfig, u u.UserManager) Server {
 	if u == nil {
 		slog.Error("user manager is nil")
 		return nil
@@ -72,16 +77,36 @@ func (s *userServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) 
 		return nil, err
 	}
 
-	token, err := s.user.CreateUser(ctx, name, email, password)
+	user, err := s.user.CreateUser(ctx, name, email, password)
 	if err != nil {
 		// TODO: already exists error
 		return nil, errFailedToCreateUser
 	}
 
+	userDetails := toUserDetails(user)
 	resp := &pb.CreateUserResponse{
-		Token: token,
+		User: userDetails,
 	}
 	return resp, nil
+}
+
+func (s *userServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	if err := validateLoginRequest(req); err != nil {
+		return &pb.LoginResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	user, err := s.user.Login(ctx, req.GetEmail(), req.GetPassword())
+	if err != nil {
+		if err.Error() == u.INVALID_CREDENTIALS {
+			return &pb.LoginResponse{}, errInvalidCredentials
+		}
+		slog.Debug("create user request failed", "error", err)
+		return &pb.LoginResponse{}, errUnknownError
+	}
+
+	return &pb.LoginResponse{
+		User: toUserDetails(user),
+	}, nil
 }
 
 func (s *userServer) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailRequest) (*pb.GetUserByEmailResponse, error) {
@@ -181,4 +206,33 @@ func isValidPassword(password string) bool {
 	// Must contain at least one special character (e.g., !@#$%^&*)
 	hasSpecialChar := regexp.MustCompile(`[!@#\$%\^&\*\(\)_\+\-=\[\]\{\};:'",<>\./?\\|]`).MatchString(password)
 	return hasSpecialChar
+}
+
+// validateLoginRequest validates the login request
+func validateLoginRequest(req *pb.LoginRequest) error {
+	if req == nil {
+		return errEmptyRequest
+	}
+
+	if req.GetEmail() == "" {
+		return errMissingEmail
+	}
+	if req.GetPassword() == "" {
+		return errMissingPassword
+	}
+	return nil
+}
+
+func toUserDetails(user u.User) *pb.UserDetails {
+
+	u := &pb.UserDetails{
+		Id:           user.Id,
+		Name:         user.Name,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		TenantId:     user.TenantID,
+		Role:         user.Role,
+	}
+
+	return u
 }
